@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SAM WEB RADIO FREE</title>
-<meta name="description" content="Ouça ao vivo: VIBE JURERÊ, VIBE GRAMADO, O SOM DO RIO GRANDE e STUDIO 2">
+<meta name="description" content="Ouça ao vivo: VIBE JURERÊ, VIBE GRAMADO, O SOM DO RIO GRANDE e STUDIO 1">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0b1724">
 <link rel="manifest" href="manifest.webmanifest">
@@ -83,7 +83,7 @@ footer a{color:var(--a2)}
     <div class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume"><span id="volv">100</span></div>
   </div>
 </main>
-<footer>SAM WEB RADIO FREE · versão 1.6 · <a href="baixar.html">baixar o app Android</a></footer>
+<footer>SAM WEB RADIO FREE · versão 1.7 · <a href="baixar.html">baixar o app Android</a></footer>
 <audio id="au" preload="none"></audio>
 <script>
 // ---- a LISTA DOS CANAIS: acrescentar um canal = acrescentar UMA linha ----
@@ -96,7 +96,7 @@ const CANAIS = [
   {nome: 'VIBE JURERÊ', http: 'http://s48.myradiostream.com:14672/;', https: 'https://s48.myradiostream.com:14672/;'},
   {nome: 'VIBE GRAMADO', http: 'http://s48.myradiostream.com:14670/;', https: 'https://s48.myradiostream.com:14670/;'},
   {nome: 'O SOM DO RIO GRANDE', http: 'http://s28.myradiostream.com:31114/;', https: 'https://s28.myradiostream.com:31114/;'},
-  {nome: 'STUDIO 2', http: 'http://uk15freenew.listen2myradio.com:20082/stream', https: null},
+  {nome: 'STUDIO 1', http: 'http://uk15freenew.listen2myradio.com:20082/stream', https: null},
 ];
 const SEGURA = location.protocol === 'https:';
 const urlDe = c => (SEGURA ? c.https : c.http) || '';

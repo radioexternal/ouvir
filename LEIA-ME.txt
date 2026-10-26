@@ -1,4 +1,4 @@
-SAM WEB RADIO FREE - versão 1.6 (código 7)
+SAM WEB RADIO FREE - versão 1.7 (código 8)
 ==========================================
 
 O que é
@@ -18,11 +18,11 @@ Canais
 1. VIBE JURERÊ           https://s48.myradiostream.com:14672/   (MP3 128 kbps)
 2. VIBE GRAMADO          https://s48.myradiostream.com:14670/   (AAC 128 kbps)
 3. O SOM DO RIO GRANDE   https://s28.myradiostream.com:31114/   (AAC 128 kbps)
-4. STUDIO 2              http://uk15freenew.listen2myradio.com:20082/stream   (MP3)
+4. STUDIO 1              http://uk15freenew.listen2myradio.com:20082/stream   (MP3)
 
 Como instalar o app (Android)
 -----------------------------
-1. Baixe o arquivo SAM-WEB-RADIO-FREE-1.6.apk no celular (pelo botão
+1. Baixe o arquivo SAM-WEB-RADIO-FREE-1.7.apk no celular (pelo botão
    «Baixar o app Android» do site, ou recebido por mensagem, e-mail ou
    cabo USB).
 2. Toque no arquivo. Na primeira vez o Android avisa que o app vem de
@@ -30,7 +30,7 @@ Como instalar o app (Android)
    desta fonte» para o aplicativo que abriu o arquivo (o navegador, o
    gerenciador de arquivos ou o de mensagens). Volte e toque em
    «Instalar».
-   Quem já tem uma versão anterior (1.0 a 1.5) instala a 1.6 por cima
+   Quem já tem uma versão anterior (1.0 a 1.6) instala a 1.7 por cima
    (atualiza sem apagar).
 3. Abra o «SAM WEB RADIO FREE», escolha o canal e toque em PLAY. No
    Android 13 ou mais novo, permita as notificações para ter o botão de
@@ -44,8 +44,8 @@ No site do SAM WEB RADIO FREE:  https://radioexternal.github.io/ouvir/
 Dá para instalar como app: no iPhone, «Compartilhar» → «Adicionar à
 Tela de Início»; no Android, «Instalar».
 VIBE JURERÊ, VIBE GRAMADO e O SOM DO RIO GRANDE tocam direto no site.
-O STUDIO 2 (sem endereço seguro) tem o botão «▶ Abrir no leitor do
+O STUDIO 1 (sem endereço seguro) tem o botão «▶ Abrir no leitor do
 celular», que o abre no leitor do próprio celular; no app Android tocam
 todos.
 
-Versão 1.6 feita por: IA-LAB4 @ LAB-REMOTO-4 (25/10/2026)
+Versão 1.7 feita por: IA-LAB4 @ LAB-REMOTO-4 (25/10/2026)
