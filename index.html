@@ -83,7 +83,7 @@ footer a{color:var(--a2)}
     <div class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume"><span id="volv">100</span></div>
   </div>
 </main>
-<footer>SAM WEB RADIO FREE · versão 1.5 · <a href="baixar.html">baixar o app Android</a></footer>
+<footer>SAM WEB RADIO FREE · versão 1.6 · <a href="baixar.html">baixar o app Android</a></footer>
 <audio id="au" preload="none"></audio>
 <script>
 // ---- a LISTA DOS CANAIS: acrescentar um canal = acrescentar UMA linha ----
@@ -93,8 +93,8 @@ footer a{color:var(--a2)}
 //        «▶ Abrir no leitor do celular» (um link de topo para o http, que o leitor do celular toca).
 // (o «;» no fim pede sempre o audio, nao a pagina de estado do servidor)
 const CANAIS = [
-  {nome: 'VIBE JURERÊ', http: 'http://144.91.92.245:14672/;', https: null},
-  {nome: 'VIBE GRAMADO', http: 'http://144.91.92.245:14670/;', https: null},
+  {nome: 'VIBE JURERÊ', http: 'http://s48.myradiostream.com:14672/;', https: 'https://s48.myradiostream.com:14672/;'},
+  {nome: 'VIBE GRAMADO', http: 'http://s48.myradiostream.com:14670/;', https: 'https://s48.myradiostream.com:14670/;'},
   {nome: 'O SOM DO RIO GRANDE', http: 'http://s28.myradiostream.com:31114/;', https: 'https://s28.myradiostream.com:31114/;'},
   {nome: 'STUDIO 2', http: 'http://uk15freenew.listen2myradio.com:20082/stream', https: null},
 ];
