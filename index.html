@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SAM WEB RADIO FREE</title>
-<meta name="description" content="Ouça ao vivo: VIBE JURERÊ, VIBE GRAMADO, O SOM DO RIO GRANDE e STUDIO 1">
+<meta name="description" content="Ouça ao vivo: O SOM DO RIO GRANDE, VIBE JURERÊ, VIBE GRAMADO e STUDIO 1">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0b1724">
 <link rel="manifest" href="manifest.webmanifest">
@@ -83,7 +83,7 @@ footer a{color:var(--a2)}
     <div class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume"><span id="volv">100</span></div>
   </div>
 </main>
-<footer>SAM WEB RADIO FREE · versão 1.7 · <a href="baixar.html">baixar o app Android</a></footer>
+<footer>SAM WEB RADIO FREE · versão 1.8 · <a href="baixar.html">baixar o app Android</a></footer>
 <audio id="au" preload="none"></audio>
 <script>
 // ---- a LISTA DOS CANAIS: acrescentar um canal = acrescentar UMA linha ----
@@ -93,9 +93,9 @@ footer a{color:var(--a2)}
 //        «▶ Abrir no leitor do celular» (um link de topo para o http, que o leitor do celular toca).
 // (o «;» no fim pede sempre o audio, nao a pagina de estado do servidor)
 const CANAIS = [
+  {nome: 'O SOM DO RIO GRANDE', http: 'http://s28.myradiostream.com:31114/;', https: 'https://s28.myradiostream.com:31114/;'},
   {nome: 'VIBE JURERÊ', http: 'http://s48.myradiostream.com:14672/;', https: 'https://s48.myradiostream.com:14672/;'},
   {nome: 'VIBE GRAMADO', http: 'http://s48.myradiostream.com:14670/;', https: 'https://s48.myradiostream.com:14670/;'},
-  {nome: 'O SOM DO RIO GRANDE', http: 'http://s28.myradiostream.com:31114/;', https: 'https://s28.myradiostream.com:31114/;'},
   {nome: 'STUDIO 1', http: 'http://uk15freenew.listen2myradio.com:20082/stream', https: null},
 ];
 const SEGURA = location.protocol === 'https:';
@@ -104,8 +104,14 @@ const $ = id => document.getElementById(id);
 const guarda = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* */ } };
 const le = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 
+// o canal guarda-se PELO NOME; ate' a 1.7 guardava-se a posicao, na ordem antiga (converte-se uma vez)
+const ORDEM_ATE_17 = ['VIBE JURERÊ', 'VIBE GRAMADO', 'O SOM DO RIO GRANDE', 'STUDIO 1'];
 let canal = 0;
-{ const c = parseInt(le('canal'), 10); if (c >= 0 && c < CANAIS.length) canal = c; }
+{
+  let n = le('canal_nome');
+  if (n === null) { const c = parseInt(le('canal'), 10); if (c >= 0 && c < ORDEM_ATE_17.length) { n = ORDEM_ATE_17[c]; guarda('canal_nome', n); } }
+  const i = CANAIS.findIndex(x => x.nome === n); if (i >= 0) canal = i;
+}
 const stream = () => urlDe(CANAIS[canal]);
 // o «tocando agora» em texto so' existe nos servidores cujo endereco acaba em «/;»
 const urlTitulo = () => (/\/;$/.test(stream()) ? stream().replace(/;$/, '') + 'currentsong?sid=1' : '');
@@ -183,7 +189,7 @@ function pintaCanais() {
 }
 function escolhe(i) {
   if (i === canal) return;
-  canal = i; guarda('canal', String(i));
+  canal = i; guarda('canal_nome', CANAIS[i].nome);
   $('titulo').textContent = ''; metaOk = true;
   if (quer && !stream()) pausa();
   pintaCanais();
