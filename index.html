@@ -79,7 +79,7 @@ footer a{color:var(--a2)}
     <div class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume"><span id="volv">100</span></div>
   </div>
 </main>
-<footer>SAM WEB RADIO FREE · versão 1.3 · <a href="baixar.html">baixar o app Android</a><br>o STUDIO 2 é um servidor gratuito e pode ficar fora do ar</footer>
+<footer>SAM WEB RADIO FREE · versão 1.4 · <a href="baixar.html">baixar o app Android</a></footer>
 <audio id="au" preload="none"></audio>
 <script>
 // ---- a LISTA DOS CANAIS: acrescentar um canal = acrescentar UMA linha ----
@@ -91,7 +91,7 @@ const CANAIS = [
   {nome: 'VIBE JURERÊ', http: 'http://144.91.92.245:14672/;', https: null},
   {nome: 'VIBE GRAMADO', http: 'http://144.91.92.245:14670/;', https: null},
   {nome: 'O SOM DO RIO GRANDE', http: 'http://s28.myradiostream.com:31114/;', https: 'https://s28.myradiostream.com:31114/;'},
-  {nome: 'STUDIO 2', http: 'http://uk15freenew.listen2myradio.com:20082/stream', https: null},   // servidor gratuito: pode ficar fora do ar
+  {nome: 'STUDIO 2', http: 'http://uk15freenew.listen2myradio.com:20082/stream', https: null},
 ];
 const SEGURA = location.protocol === 'https:';
 const urlDe = c => (SEGURA ? c.https : c.http) || '';

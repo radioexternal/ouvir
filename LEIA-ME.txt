@@ -1,9 +1,9 @@
-SAM WEB RADIO FREE - versão 1.3 (código 4)
+SAM WEB RADIO FREE - versão 1.4 (código 5)
 ==========================================
 
 O que é
 -------
-Um leitor gratuito, só para ouvintes, com 4 canais ao vivo. Escolha o
+Um leitor só para ouvintes, com 4 canais ao vivo. Escolha o
 canal (fica guardado), toque com PLAY/PAUSA e volume; trocar de canal
 não fecha o leitor. Mostra o «tocando agora» do canal quando o
 servidor envia o título, continua tocando com a tela bloqueada (com uma
@@ -20,11 +20,9 @@ Canais
 3. O SOM DO RIO GRANDE   http://s28.myradiostream.com:31114/   (AAC 128 kbps)
 4. STUDIO 2              http://uk15freenew.listen2myradio.com:20082/stream   (MP3)
 
-O STUDIO 2 é um servidor gratuito e pode ficar fora do ar.
-
 Como instalar o app (Android)
 -----------------------------
-1. Baixe o arquivo SAM-WEB-RADIO-FREE-1.3.apk no celular (pelo botão
+1. Baixe o arquivo SAM-WEB-RADIO-FREE-1.4.apk no celular (pelo botão
    «Baixar o app Android» do site, ou recebido por mensagem, e-mail ou
    cabo USB).
 2. Toque no arquivo. Na primeira vez o Android avisa que o app vem de
@@ -32,7 +30,7 @@ Como instalar o app (Android)
    desta fonte» para o aplicativo que abriu o arquivo (o navegador, o
    gerenciador de arquivos ou o de mensagens). Volte e toque em
    «Instalar».
-   Quem já tem uma versão anterior (1.0 a 1.2) instala a 1.3 por cima
+   Quem já tem uma versão anterior (1.0 a 1.3) instala a 1.4 por cima
    (atualiza sem apagar).
 3. Abra o «SAM WEB RADIO FREE», escolha o canal e toque em PLAY. No
    Android 13 ou mais novo, permita as notificações para ter o botão de
@@ -49,4 +47,4 @@ O site é seguro (https) e o navegador só toca canais com endereço
 seguro: por enquanto, no site, toca O SOM DO RIO GRANDE; os outros
 canais tocam no app Android.
 
-Versão 1.3 feita por: IA-LAB4 @ LAB-REMOTO-4 (25/10/2026)
+Versão 1.4 feita por: IA-LAB4 @ LAB-REMOTO-4 (25/10/2026)
