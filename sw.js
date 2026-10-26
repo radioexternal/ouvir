@@ -1,6 +1,6 @@
 // SAM WEB RADIO FREE - o service worker: guarda SO' a pagina e os icones (para abrir depressa e como app).
 // NUNCA guarda o audio: tudo o que nao esta' na lista (os streams, que sao de outros servidores) passa direto.
-const VERSAO = 'sam-webradio-free-1.8';
+const VERSAO = 'sam-webradio-free-1.9';
 const PAGINA = ['./', 'index.html', 'baixar.html', 'manifest.webmanifest', 'logo.png',
   'icones/icone-192.png', 'icones/icone-512.png', 'icones/apple-touch-icon.png', 'icones/favicon-32.png'];
 
