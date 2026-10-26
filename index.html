@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SAM WEB RADIO FREE</title>
+<meta name="description" content="Ouça ao vivo: VIBE JURERÊ, VIBE GRAMADO, O SOM DO RIO GRANDE e STUDIO 2">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b1724">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icones/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icones/icone-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icones/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SAM RADIO">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{--f:#04070a;--p:rgba(16,26,36,.86);--b:#1d3446;--t:#eef3f6;--m:#8797a3;--a:#ff9500;--a2:#ffc27a}
+[hidden]{display:none!important}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;color:var(--t);font:15px system-ui,-apple-system,Roboto,"Segoe UI",sans-serif;
+  background:radial-gradient(120% 60% at 50% -10%,#16304a 0%,#06101a 45%,var(--f) 100%) fixed;background-color:var(--f)}
+body{display:flex;flex-direction:column;min-height:100vh;padding-top:env(safe-area-inset-top)}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px 10px;border-bottom:1px solid rgba(255,149,0,.45);background:linear-gradient(180deg,rgba(10,20,30,.95),rgba(4,7,10,.6))}
+header img{height:36px;border-radius:8px;box-shadow:0 0 12px rgba(255,149,0,.35)}
+header .marca{display:flex;flex-direction:column;line-height:1}
+header .marca b{font:900 16px ui-monospace,monospace;letter-spacing:.16em;color:var(--a)}
+header .marca span{font:700 10px ui-monospace,monospace;letter-spacing:.24em;color:var(--m);margin-top:4px}
+header a{margin-left:auto;color:var(--a2);font:800 12px system-ui,-apple-system,sans-serif;text-decoration:none;border:1px solid var(--b);border-radius:20px;padding:7px 12px;white-space:nowrap}
+main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 16px 28px;max-width:520px;width:100%;margin:0 auto}
+.faixa{display:flex;gap:10px;align-items:center;background:#1d1204;border:1px solid var(--a);color:var(--a2);border-radius:14px;padding:10px 12px;margin:0 0 14px;font:600 13px system-ui,-apple-system,sans-serif}
+.faixa span{flex:1}.faixa button{flex:none;background:none;border:0;color:var(--a2);font:900 18px system-ui;cursor:pointer;padding:0 4px}
+.faixa.inst button.sim{font:800 13px system-ui;border:1px solid var(--a);border-radius:12px;padding:6px 10px}
+.canais{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 16px}
+.canais button{min-height:52px;padding:10px 12px;border-radius:16px;border:1px solid var(--b);background:linear-gradient(135deg,#112131,#0a121a);
+  color:var(--t);font:800 13px system-ui,-apple-system,sans-serif;letter-spacing:.04em;cursor:pointer;text-align:center}
+.canais button:focus-visible,.play:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.canais button[aria-pressed=true]{border-color:var(--a);color:var(--a2);box-shadow:0 0 0 1px var(--a),0 0 18px rgba(255,149,0,.2)}
+.canais button[aria-pressed=true]::before{content:'● ';color:var(--a)}
+.canais button.sem small{display:block;font:600 10px system-ui,-apple-system,sans-serif;color:var(--m);letter-spacing:0;margin-top:3px}
+.cx{background:var(--p);border:1px solid var(--b);border-radius:24px;padding:26px 20px 22px;box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center}
+.cx.toca{border-color:var(--a);box-shadow:0 0 0 1px var(--a),0 0 30px rgba(255,149,0,.22)}
+.nome{font:900 22px system-ui,-apple-system,sans-serif;letter-spacing:.04em;margin:0 0 6px}
+.estado{font:700 12px ui-monospace,monospace;letter-spacing:.14em;color:var(--m);min-height:16px;text-transform:uppercase}
+.estado.vivo{color:var(--a2)}
+.play{display:block;margin:24px auto 22px;width:112px;height:112px;border-radius:50%;border:0;cursor:pointer;
+  background:linear-gradient(180deg,#ffb23d,#ff8a00);color:#1a0d00;box-shadow:0 6px 22px rgba(255,149,0,.45)}
+.play svg{width:46px;height:46px;display:block;margin:auto;fill:currentColor}
+.cx.toca .play{background:linear-gradient(180deg,#3a4652,#222b33);color:#fff;box-shadow:none}
+.play:disabled{background:#1b252e;color:#4d5b66;box-shadow:none;cursor:not-allowed}
+.aviso{margin:0 0 18px;padding:12px;border-radius:14px;border:1px solid var(--b);background:#0a1118;color:var(--t);font:600 14px/1.4 system-ui,-apple-system,sans-serif}
+.aviso a{color:var(--a2)}
+.agora{min-height:44px;margin:0 0 18px}
+.agora small{display:block;font:800 10px ui-monospace,monospace;letter-spacing:.22em;color:var(--m);margin-bottom:5px}
+.agora b{font:700 15px system-ui,-apple-system,sans-serif;line-height:1.35;word-break:break-word}
+.vol{display:flex;align-items:center;gap:12px}
+.vol span{font:800 11px ui-monospace,monospace;letter-spacing:.12em;color:var(--m);min-width:38px;text-align:right}
+input[type=range]{flex:1;min-width:0;accent-color:var(--a);height:28px}
+.eq{display:inline-flex;gap:2px;align-items:flex-end;height:12px;margin-left:8px;vertical-align:middle}.eq i{width:3px;background:var(--a);animation:eq .8s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}@keyframes eq{0%,100%{height:3px}50%{height:12px}}
+footer{text-align:center;color:var(--m);font:600 11px/1.5 system-ui,-apple-system,sans-serif;padding:0 16px calc(18px + env(safe-area-inset-bottom))}
+footer a{color:var(--a2)}
+@media (prefers-reduced-motion:reduce){.eq i{animation:none;height:8px}}
+</style>
+</head>
+<body>
+<header><img src="logo.png" alt="SAM"><div class="marca"><b>SAM WEB RADIO</b><span>FREE</span></div><a href="baixar.html">App Android</a></header>
+<main>
+  <div class="faixa" id="faixa-ios" hidden><span>Para instalar: toque em <b>Compartilhar</b> → <b>Adicionar à Tela de Início</b></span><button id="faixa-ios-x" aria-label="Fechar">×</button></div>
+  <div class="faixa inst" id="faixa-inst" hidden><span>Instale o leitor no seu celular</span><button class="sim" id="instalar">Instalar</button><button id="faixa-inst-x" aria-label="Fechar">×</button></div>
+  <div class="canais" id="canais" role="group" aria-label="Canais"></div>
+  <div class="cx" id="cx">
+    <p class="nome" id="nome"></p>
+    <div class="estado" id="estado" aria-live="polite">toque em play para ouvir</div>
+    <button class="play" id="play" aria-label="Tocar"><svg id="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+    <div class="aviso" id="aviso" hidden>Este canal ainda não toca em páginas seguras — use o <a href="baixar.html">app Android</a>.</div>
+    <div class="agora" id="agora" hidden><small>TOCANDO AGORA</small><b id="titulo"></b></div>
+    <div class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume"><span id="volv">100</span></div>
+  </div>
+</main>
+<footer>SAM WEB RADIO FREE · versão 1.3 · <a href="baixar.html">baixar o app Android</a><br>o STUDIO 2 é um servidor gratuito e pode ficar fora do ar</footer>
+<audio id="au" preload="none"></audio>
+<script>
+// ---- a LISTA DOS CANAIS: acrescentar um canal = acrescentar UMA linha ----
+// http:  o endereco normal (vale na pagina aberta do computador ou num site sem cadeado)
+// https: o endereco seguro; e' o UNICO que toca numa pagina https (o navegador bloqueia o http).
+//        null = este canal ainda nao tem endereco seguro: o botao PLAY fica desligado com a explicacao.
+// (o «;» no fim pede sempre o audio, nao a pagina de estado do servidor)
+const CANAIS = [
+  {nome: 'VIBE JURERÊ', http: 'http://144.91.92.245:14672/;', https: null},
+  {nome: 'VIBE GRAMADO', http: 'http://144.91.92.245:14670/;', https: null},
+  {nome: 'O SOM DO RIO GRANDE', http: 'http://s28.myradiostream.com:31114/;', https: 'https://s28.myradiostream.com:31114/;'},
+  {nome: 'STUDIO 2', http: 'http://uk15freenew.listen2myradio.com:20082/stream', https: null},   // servidor gratuito: pode ficar fora do ar
+];
+const SEGURA = location.protocol === 'https:';
+const urlDe = c => (SEGURA ? c.https : c.http) || '';
+const $ = id => document.getElementById(id);
+const guarda = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* */ } };
+const le = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+
+let canal = 0;
+{ const c = parseInt(le('canal'), 10); if (c >= 0 && c < CANAIS.length) canal = c; }
+const stream = () => urlDe(CANAIS[canal]);
+// o «tocando agora» em texto so' existe nos servidores cujo endereco acaba em «/;»
+const urlTitulo = () => (/\/;$/.test(stream()) ? stream().replace(/;$/, '') + 'currentsong?sid=1' : '');
+const au = $('au');
+const PLAY = '<path d="M8 5v14l11-7z"/>', PAUSA = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+let quer = false, tentativas = 0, tReligar = 0, tocou = false, aEsperar = false, abertoEm = 0, ultimoT = -1, paradoDesde = 0, desde = 0,
+  estado = 'parado', metaOk = true, tMeta = 0;
+
+function mostra(e) {
+  if (e !== estado) desde = Date.now();
+  estado = e;
+  const TXT = {parado: 'toque em play para ouvir', conectando: 'conectando…', carregando: 'carregando…', tocando: 'ao vivo',
+    reconectando: 'reconectando…', 'sem rede': 'sem internet — volta sozinho', 'fora do ar': 'canal fora do ar — tentando de novo',
+    indisponivel: 'disponível no app Android'};
+  const s = $('estado');
+  s.textContent = TXT[e] || e;
+  s.className = 'estado' + (e === 'tocando' ? ' vivo' : '');
+  if (e === 'tocando') { const q = document.createElement('span'); q.className = 'eq'; q.innerHTML = '<i></i><i></i><i></i>'; s.appendChild(q); }
+  $('cx').className = 'cx' + (quer ? ' toca' : '');
+  $('ico').innerHTML = quer ? PAUSA : PLAY;
+  $('play').setAttribute('aria-label', quer ? 'Pausar' : 'Tocar');
+  $('agora').hidden = !(quer && $('titulo').textContent);
+}
+
+function abre() {
+  clearTimeout(tReligar); aEsperar = false;
+  if (!quer) return;
+  if (!stream()) { quer = false; mostra('indisponivel'); return; }
+  tocou = false; abertoEm = Date.now();
+  mostra(!tentativas ? 'conectando' : estado === 'fora do ar' ? 'fora do ar' : 'reconectando');
+  au.src = stream();                        // ao vivo: sempre do ponto atual
+  const p = au.play();
+  if (p && p.catch) p.catch(err => {
+    if (!quer) return;
+    if (err && err.name === 'NotAllowedError') { quer = false; mostra('parado'); return; }
+    religa();
+  });
+}
+
+function fechaAudio() { au.removeAttribute('src'); try { au.load(); } catch (e) { /* */ } }
+
+// 404, erro ou nao liga: «fora do ar» e tenta de novo com espera crescente (2, 4, 8, 16, 32, 60... s)
+function religa() {
+  if (!quer || aEsperar) return;            // o erro e a recusa do play() chegam os dois: so' conta uma vez
+  aEsperar = true;
+  fechaAudio();
+  tentativas++;
+  mostra(navigator.onLine === false ? 'sem rede' : (!tocou || tentativas >= 3) ? 'fora do ar' : 'reconectando');
+  clearTimeout(tReligar);
+  tReligar = setTimeout(abre, Math.min(60000, 2000 * 2 ** Math.min(tentativas - 1, 5)));
+}
+
+function toca() { quer = true; tentativas = 0; abre(); meta(); }
+function pausa() { quer = false; aEsperar = false; clearTimeout(tReligar); clearTimeout(tMeta); fechaAudio(); mostra('parado'); }
+$('play').onclick = () => (quer ? pausa() : toca());
+
+// os botoes dos CANAIS: o escolhido fica guardado (so' neste aparelho); a tocar, passa logo para o novo
+function pintaCanais() {
+  const cs = $('canais');
+  if (cs.childElementCount !== CANAIS.length) {
+    cs.textContent = '';
+    CANAIS.forEach((c, i) => {
+      const b = document.createElement('button'); b.textContent = c.nome;
+      if (!urlDe(c)) { b.className = 'sem'; const s = document.createElement('small'); s.textContent = 'só no app Android'; b.appendChild(s); }
+      b.onclick = () => escolhe(i); cs.appendChild(b);
+    });
+  }
+  [...cs.children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === canal)));
+  $('nome').textContent = CANAIS[canal].nome;
+  const pode = !!stream();
+  $('play').disabled = !pode;
+  $('aviso').hidden = pode;
+  if (!pode && !quer) mostra('indisponivel'); else if (!quer) mostra('parado');
+}
+function escolhe(i) {
+  if (i === canal) return;
+  canal = i; guarda('canal', String(i));
+  $('titulo').textContent = ''; metaOk = true;
+  if (quer && !stream()) pausa();
+  pintaCanais();
+  if (quer) { tentativas = 0; aEsperar = false; fechaAudio(); abre(); meta(); }
+}
+pintaCanais();
+au.addEventListener('playing', () => { tentativas = 0; tocou = true; mostra('tocando'); });
+au.addEventListener('waiting', () => quer && mostra('carregando'));
+au.addEventListener('error', () => quer && au.getAttribute('src') && religa());   // (o erro de tirar o src ao trocar nao conta)
+au.addEventListener('ended', () => quer && religa());       // um stream ao vivo nao acaba: caiu
+window.addEventListener('online', () => { if (quer) { tentativas = 0; abre(); } });
+window.addEventListener('offline', () => quer && mostra('sem rede'));
+
+// o vigia: nao ligou em 25 s, preso a carregar, ou o audio parado no mesmo ponto: religa
+setInterval(() => {
+  if (!quer || aEsperar) return;
+  const agora = Date.now();
+  if (!tocou && agora - abertoEm > 25000) religa();
+  else if (estado === 'carregando' && agora - desde > 25000) religa();
+  else if (estado === 'tocando') {
+    if (au.currentTime !== ultimoT) { ultimoT = au.currentTime; paradoDesde = agora; }
+    else if (agora - paradoDesde > 20000) religa();
+  }
+}, 5000);
+
+// o volume (guardado so' neste aparelho)
+const vol = $('vol');
+{ const v = le('vol'); if (v !== null) vol.value = v; }
+const aplicaVol = () => { au.volume = vol.value / 100; $('volv').textContent = vol.value; };
+vol.oninput = () => { aplicaVol(); guarda('vol', vol.value); };
+aplicaVol();
+
+// o «tocando agora»: o servidor da' o titulo em texto; se o navegador nao deixar ler, fica so' o leitor
+function meta() {
+  clearTimeout(tMeta);
+  const u = urlTitulo();
+  if (!quer || !metaOk || !u) return;
+  const deQuem = canal;
+  fetch(u, {cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer'})
+    .then(r => (r.ok ? r.text() : Promise.reject()))
+    .then(t => { if (deQuem !== canal) return; t = t.trim(); $('titulo').textContent = t; $('agora').hidden = !(quer && t); })
+    .catch(() => { metaOk = false; })
+    .finally(() => { if (metaOk && quer && deQuem === canal) { clearTimeout(tMeta); tMeta = setTimeout(meta, 30000); } });
+}
+
+// ---- instalar como app ----
+const instalado = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (ios && !instalado && !le('faixa-ios')) $('faixa-ios').hidden = false;      // so' na primeira visita
+$('faixa-ios-x').onclick = () => { $('faixa-ios').hidden = true; guarda('faixa-ios', '1'); };
+let pedido = null;                                                             // Android/PC: o navegador oferece «Instalar»
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedido = e; if (!le('faixa-inst')) $('faixa-inst').hidden = false; });
+$('instalar').onclick = () => { $('faixa-inst').hidden = true; if (pedido) { pedido.prompt(); pedido = null; } };
+$('faixa-inst-x').onclick = () => { $('faixa-inst').hidden = true; guarda('faixa-inst', '1'); };
+if ('serviceWorker' in navigator && SEGURA) navigator.serviceWorker.register('sw.js').catch(() => { /* */ });
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+SAM WEB RADIO FREE - versão 1.3 (código 4)
+==========================================
+
+O que é
+-------
+Um leitor gratuito, só para ouvintes, com 4 canais ao vivo. Escolha o
+canal (fica guardado), toque com PLAY/PAUSA e volume; trocar de canal
+não fecha o leitor. Mostra o «tocando agora» do canal quando o
+servidor envia o título, continua tocando com a tela bloqueada (com uma
+notificação para pausar) e reconecta sozinho se a internet cair.
+Se um canal estiver fora do ar, aparece «canal fora do ar — tentando de
+novo»: o leitor tenta de novo sozinho (esperando cada vez mais, até 60 s)
+e você pode escolher outro canal a qualquer momento.
+Não grava, não usa o microfone, não pede contas nem senhas.
+
+Canais
+------
+1. VIBE JURERÊ           http://144.91.92.245:14672/   (MP3 128 kbps)
+2. VIBE GRAMADO          http://144.91.92.245:14670/   (AAC 128 kbps)
+3. O SOM DO RIO GRANDE   http://s28.myradiostream.com:31114/   (AAC 128 kbps)
+4. STUDIO 2              http://uk15freenew.listen2myradio.com:20082/stream   (MP3)
+
+O STUDIO 2 é um servidor gratuito e pode ficar fora do ar.
+
+Como instalar o app (Android)
+-----------------------------
+1. Baixe o arquivo SAM-WEB-RADIO-FREE-1.3.apk no celular (pelo botão
+   «Baixar o app Android» do site, ou recebido por mensagem, e-mail ou
+   cabo USB).
+2. Toque no arquivo. Na primeira vez o Android avisa que o app vem de
+   «fontes desconhecidas»: toque em «Configurações» e ative «Permitir
+   desta fonte» para o aplicativo que abriu o arquivo (o navegador, o
+   gerenciador de arquivos ou o de mensagens). Volte e toque em
+   «Instalar».
+   Quem já tem uma versão anterior (1.0 a 1.2) instala a 1.3 por cima
+   (atualiza sem apagar).
+3. Abra o «SAM WEB RADIO FREE», escolha o canal e toque em PLAY. No
+   Android 13 ou mais novo, permita as notificações para ter o botão de
+   pausa na tela bloqueada.
+Permissões do app: internet, estado da rede, manter o celular acordado
+enquanto toca, serviço de reprodução em segundo plano e notificações.
+
+Ouvir no navegador (PC, iPhone, qualquer celular)
+-------------------------------------------------
+No site do SAM WEB RADIO FREE:  https://radioexternal.github.io/ouvir/
+Dá para instalar como app: no iPhone, «Compartilhar» → «Adicionar à
+Tela de Início»; no Android, «Instalar».
+O site é seguro (https) e o navegador só toca canais com endereço
+seguro: por enquanto, no site, toca O SOM DO RIO GRANDE; os outros
+canais tocam no app Android.
+
+Versão 1.3 feita por: IA-LAB4 @ LAB-REMOTO-4 (25/10/2026)

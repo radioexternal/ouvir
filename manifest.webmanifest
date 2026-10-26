@@ -1,0 +1,18 @@
+{
+  "name": "SAM WEB RADIO FREE",
+  "short_name": "SAM RADIO",
+  "description": "Ouça ao vivo: VIBE JURERÊ, VIBE GRAMADO, O SOM DO RIO GRANDE e STUDIO 2",
+  "lang": "pt-BR",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#04070a",
+  "theme_color": "#0b1724",
+  "icons": [
+    { "src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icones/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}
