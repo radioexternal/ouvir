@@ -40,7 +40,7 @@ enquanto toca, serviço de reprodução em segundo plano e notificações.
 
 Ouvir no navegador (PC, iPhone, qualquer celular)
 -------------------------------------------------
-No site do SAM WEB RADIO FREE:  https://SEU-USUARIO.github.io/ouvir/
+No site do SAM WEB RADIO FREE:  https://radioexternal.github.io/ouvir/
 Dá para instalar como app: no iPhone, «Compartilhar» → «Adicionar à
 Tela de Início»; no Android, «Instalar».
 O SOM DO RIO GRANDE, VIBE JURERÊ e VIBE GRAMADO tocam direto no site.
