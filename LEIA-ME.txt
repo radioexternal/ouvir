@@ -1,4 +1,4 @@
-SAM WEB RADIO FREE - versão 1.4 (código 5)
+SAM WEB RADIO FREE - versão 1.5 (código 6)
 ==========================================
 
 O que é
@@ -22,7 +22,7 @@ Canais
 
 Como instalar o app (Android)
 -----------------------------
-1. Baixe o arquivo SAM-WEB-RADIO-FREE-1.4.apk no celular (pelo botão
+1. Baixe o arquivo SAM-WEB-RADIO-FREE-1.5.apk no celular (pelo botão
    «Baixar o app Android» do site, ou recebido por mensagem, e-mail ou
    cabo USB).
 2. Toque no arquivo. Na primeira vez o Android avisa que o app vem de
@@ -30,7 +30,7 @@ Como instalar o app (Android)
    desta fonte» para o aplicativo que abriu o arquivo (o navegador, o
    gerenciador de arquivos ou o de mensagens). Volte e toque em
    «Instalar».
-   Quem já tem uma versão anterior (1.0 a 1.3) instala a 1.4 por cima
+   Quem já tem uma versão anterior (1.0 a 1.4) instala a 1.5 por cima
    (atualiza sem apagar).
 3. Abra o «SAM WEB RADIO FREE», escolha o canal e toque em PLAY. No
    Android 13 ou mais novo, permita as notificações para ter o botão de
@@ -43,8 +43,9 @@ Ouvir no navegador (PC, iPhone, qualquer celular)
 No site do SAM WEB RADIO FREE:  https://radioexternal.github.io/ouvir/
 Dá para instalar como app: no iPhone, «Compartilhar» → «Adicionar à
 Tela de Início»; no Android, «Instalar».
-O site é seguro (https) e o navegador só toca canais com endereço
-seguro: por enquanto, no site, toca O SOM DO RIO GRANDE; os outros
-canais tocam no app Android.
+O site é seguro (https) e o navegador só toca dentro da página os
+canais com endereço seguro: por enquanto O SOM DO RIO GRANDE. Os
+outros canais têm o botão «▶ Abrir no leitor do celular», que os abre
+no leitor do próprio celular; e tocam todos no app Android.
 
-Versão 1.4 feita por: IA-LAB4 @ LAB-REMOTO-4 (25/10/2026)
+Versão 1.5 feita por: IA-LAB4 @ LAB-REMOTO-4 (25/10/2026)

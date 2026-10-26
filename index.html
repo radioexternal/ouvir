@@ -51,6 +51,9 @@ main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20
 .play:disabled{background:#1b252e;color:#4d5b66;box-shadow:none;cursor:not-allowed}
 .aviso{margin:0 0 18px;padding:12px;border-radius:14px;border:1px solid var(--b);background:#0a1118;color:var(--t);font:600 14px/1.4 system-ui,-apple-system,sans-serif}
 .aviso a{color:var(--a2)}
+.aviso a.abrir{display:block;margin:10px auto 2px;max-width:300px;padding:12px 14px;border-radius:14px;text-decoration:none;text-align:center;
+  background:linear-gradient(180deg,#ffb23d,#ff8a00);color:#1a0d00;font:900 15px system-ui,-apple-system,sans-serif}
+.aviso a.abrir:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .agora{min-height:44px;margin:0 0 18px}
 .agora small{display:block;font:800 10px ui-monospace,monospace;letter-spacing:.22em;color:var(--m);margin-bottom:5px}
 .agora b{font:700 15px system-ui,-apple-system,sans-serif;line-height:1.35;word-break:break-word}
@@ -74,18 +77,20 @@ footer a{color:var(--a2)}
     <p class="nome" id="nome"></p>
     <div class="estado" id="estado" aria-live="polite">toque em play para ouvir</div>
     <button class="play" id="play" aria-label="Tocar"><svg id="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-    <div class="aviso" id="aviso" hidden>Este canal ainda não toca em páginas seguras — use o <a href="baixar.html">app Android</a>.</div>
+    <div class="aviso" id="aviso" hidden>Este canal ainda não toca dentro de páginas seguras. Abra-o no leitor do celular ou use o <a href="baixar.html">app Android</a>.
+      <a class="abrir" id="abrir" href="baixar.html" target="_blank" rel="noopener noreferrer">▶ Abrir no leitor do celular</a></div>
     <div class="agora" id="agora" hidden><small>TOCANDO AGORA</small><b id="titulo"></b></div>
     <div class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume"><span id="volv">100</span></div>
   </div>
 </main>
-<footer>SAM WEB RADIO FREE · versão 1.4 · <a href="baixar.html">baixar o app Android</a></footer>
+<footer>SAM WEB RADIO FREE · versão 1.5 · <a href="baixar.html">baixar o app Android</a></footer>
 <audio id="au" preload="none"></audio>
 <script>
 // ---- a LISTA DOS CANAIS: acrescentar um canal = acrescentar UMA linha ----
 // http:  o endereco normal (vale na pagina aberta do computador ou num site sem cadeado)
 // https: o endereco seguro; e' o UNICO que toca numa pagina https (o navegador bloqueia o http).
-//        null = este canal ainda nao tem endereco seguro: o botao PLAY fica desligado com a explicacao.
+//        null = este canal ainda nao tem endereco seguro: o PLAY fica desligado e aparece
+//        «▶ Abrir no leitor do celular» (um link de topo para o http, que o leitor do celular toca).
 // (o «;» no fim pede sempre o audio, nao a pagina de estado do servidor)
 const CANAIS = [
   {nome: 'VIBE JURERÊ', http: 'http://144.91.92.245:14672/;', https: null},
@@ -114,7 +119,7 @@ function mostra(e) {
   estado = e;
   const TXT = {parado: 'toque em play para ouvir', conectando: 'conectando…', carregando: 'carregando…', tocando: 'ao vivo',
     reconectando: 'reconectando…', 'sem rede': 'sem internet — volta sozinho', 'fora do ar': 'canal fora do ar — tentando de novo',
-    indisponivel: 'disponível no app Android'};
+    indisponivel: 'abra no leitor do celular'};
   const s = $('estado');
   s.textContent = TXT[e] || e;
   s.className = 'estado' + (e === 'tocando' ? ' vivo' : '');
@@ -164,7 +169,7 @@ function pintaCanais() {
     cs.textContent = '';
     CANAIS.forEach((c, i) => {
       const b = document.createElement('button'); b.textContent = c.nome;
-      if (!urlDe(c)) { b.className = 'sem'; const s = document.createElement('small'); s.textContent = 'só no app Android'; b.appendChild(s); }
+      if (!urlDe(c)) { b.className = 'sem'; const s = document.createElement('small'); s.textContent = 'abre no leitor do celular'; b.appendChild(s); }
       b.onclick = () => escolhe(i); cs.appendChild(b);
     });
   }
@@ -173,6 +178,7 @@ function pintaCanais() {
   const pode = !!stream();
   $('play').disabled = !pode;
   $('aviso').hidden = pode;
+  if (!pode) $('abrir').href = CANAIS[canal].http;           // link de topo para o http: o leitor do proprio celular toca-o
   if (!pode && !quer) mostra('indisponivel'); else if (!quer) mostra('parado');
 }
 function escolhe(i) {
