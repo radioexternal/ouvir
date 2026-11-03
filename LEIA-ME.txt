@@ -135,6 +135,9 @@ O STUDIO 2 (sem endereço seguro) tem o botão «▶ Abrir no leitor do
 celular», que o abre no leitor do próprio celular; no app Android tocam
 todos.
 
+Motor dos MEDIDORES (publicado): o medidores.js vai BARALHADO (sem comentários, difícil de ler) na página do site e no app; o código legível fica no repositório; o comportamento é o mesmo (continua 2.4). © SAM Broadcast Technology.
+Published METERS engine: medidores.js ships OBFUSCATED (comments stripped, hard to read) in the web page and the Android app; the readable source stays in the repo; behaviour is unchanged (still 2.4). © SAM Broadcast Technology.
+
 Versão 2.4 feita por: IA-LAB4 @ LAB-REMOTO-4 (03/11/2026) - 2.4: os 10 PADS também no L|R (pads in stereo too)
 Versão 2.3 feita por: IA-LAB4 @ LAB-REMOTO-4 (03/11/2026) - 2.3: ESTILO do RTA, VU L/R no L+R, 10 PADS, ⚙ SISTEMA com senha
 Versão 2.1 feita por: IA-LAB4 @ LAB-REMOTO-4 (02/11/2026) - 2.1: MEDIDORES L|R e L+R, CASCATA, AUTO PICO, GANHO/GATE, EN/PT
