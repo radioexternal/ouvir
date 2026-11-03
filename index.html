@@ -67,6 +67,28 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--a);height:28px}
 footer{text-align:center;color:var(--m);font:600 11px/1.5 system-ui,-apple-system,sans-serif;padding:0 16px calc(18px + env(safe-area-inset-bottom))}
 footer a{color:var(--a2)}
 @media (prefers-reduced-motion:reduce){.eq i{animation:none;height:8px}}
+/* (2.3) o SISTEMA (a area do dono, com a senha): os PADS dos MEDIDORES */
+.sisb{background:none;border:1px solid var(--b);border-radius:14px;color:var(--m);font:700 11px system-ui,-apple-system,sans-serif;padding:6px 10px;margin:8px 0 0;cursor:pointer}
+.sis{position:fixed;top:0;right:0;bottom:0;left:0;z-index:10050;background:rgba(0,0,0,.78);display:flex;justify-content:center;align-items:flex-start;overflow:auto;padding:16px}
+.sis .q{background:#0b1620;border:1px solid var(--b);border-radius:18px;width:100%;max-width:620px;padding:16px;margin:auto 0;text-align:left}
+.sis h2{font:900 16px system-ui,-apple-system,sans-serif;letter-spacing:.1em;margin:0 0 12px;color:var(--a2)}
+.sis h3{font:900 13px system-ui,-apple-system,sans-serif;letter-spacing:.12em;margin:4px 0 6px;color:#4fc3f7}
+.sis label{display:block;font:700 12px system-ui,-apple-system,sans-serif;color:var(--m);margin:0 0 6px}
+.sis input{width:100%;min-width:0;min-height:40px;border-radius:10px;border:1px solid var(--b);background:#050a0f;color:var(--t);font:600 14px system-ui,-apple-system,sans-serif;padding:8px 10px}
+.sis input:focus{outline:2px solid #4fc3f7;outline-offset:1px}
+.sis button{min-height:40px;min-width:40px;border-radius:12px;border:1px solid var(--b);background:linear-gradient(180deg,#14212d,#0a121a);color:var(--t);font:800 13px system-ui,-apple-system,sans-serif;padding:0 14px;cursor:pointer}
+.sis button.pri{border-color:var(--a);color:var(--a2)}
+.sis button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.sis .lin1{display:flex;gap:8px}
+.sis .lin{display:grid;grid-template-columns:22px minmax(0,1fr) minmax(0,2fr) 40px;gap:6px;align-items:center;margin:0 0 6px}
+.sis .lin .n{font:800 12px ui-monospace,monospace;color:var(--m);text-align:right}
+.sis .lin button{padding:0}
+.sis .acoes{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin:10px 0 0}
+.sis .dica{font:600 12px/1.4 system-ui,-apple-system,sans-serif;color:var(--m);margin:0 0 10px}
+.sis .msg{font:700 13px system-ui,-apple-system,sans-serif;margin:8px 0 0;min-height:18px;color:var(--m)}
+.sis .msg.erro{color:var(--a2)}
+.sis .msg.ok{color:#4fc3f7}
+@media (max-width:520px){.sis{padding:8px}.sis .lin{grid-template-columns:22px minmax(0,1fr) 40px}.sis .lin .u{grid-column:2;grid-row:2}}
 </style>
 </head>
 <body>
@@ -86,7 +108,26 @@ footer a{color:var(--a2)}
     <button class="med" id="med">📊 MEDIDORES</button>
   </div>
 </main>
-<footer>SAM WEB RADIO FREE · versão 2.1 · <a href="baixar.html">baixar o app Android</a></footer>
+<footer>SAM WEB RADIO FREE · versão 2.3 · <a href="baixar.html">baixar o app Android</a><br><button class="sisb" id="sistema" type="button">⚙ SISTEMA</button></footer>
+<div class="sis" id="sis" hidden role="dialog" aria-modal="true" aria-labelledby="sis-t">
+  <div class="q">
+    <h2 id="sis-t">⚙ SISTEMA</h2>
+    <form id="sis-entrar" autocomplete="off">
+      <label for="sis-senha">Senha do SISTEMA</label>
+      <div class="lin1"><input type="password" id="sis-senha" autocomplete="current-password"><button class="pri" type="submit">Entrar</button></div>
+      <p class="msg erro" id="sis-erro" hidden>Senha errada.</p>
+    </form>
+    <div id="sis-pads" hidden>
+      <h3>PADS (10)</h3>
+      <p class="dica">Os 10 atalhos dos 📊 MEDIDORES (tela L+R): nome e endereço da web rádio. Só http:// ou https://.
+        Num site seguro (https) só tocam os endereços https://. Ficam guardados só neste aparelho.</p>
+      <div id="sis-lista"></div>
+      <div class="acoes"><button type="button" id="sis-padrao">Os 4 canais</button><button type="button" id="sis-limpar">Limpar todos</button><button type="button" class="pri" id="sis-salvar">Salvar</button></div>
+      <p class="msg" id="sis-msg" aria-live="polite"></p>
+    </div>
+    <div class="acoes"><button type="button" id="sis-fechar">Fechar</button></div>
+  </div>
+</div>
 <audio id="au" preload="none"></audio>
 <script src="medidores.js"></script>
 <script>
@@ -117,7 +158,10 @@ let canal = 0;
   if (n === 'STUDIO 1') n = 'STUDIO 2';   // a 1.8 chamava-lhe STUDIO 1 (o mesmo canal)
   const i = CANAIS.findIndex(x => x.nome === n); if (i >= 0) canal = i;
 }
-const stream = () => urlDe(CANAIS[canal]);
+// (2.3) extra = um PAD dos MEDIDORES com endereco proprio (fora da lista): toca por cima do canal escolhido (nao fica guardado)
+let extra = null;
+const stream = () => (extra ? extra.url : urlDe(CANAIS[canal]));
+const nomeAtual = () => (extra ? extra.nome : CANAIS[canal].nome);
 // o «tocando agora» em texto so' existe nos servidores cujo endereco acaba em «/;»
 const urlTitulo = () => (/\/;$/.test(stream()) ? stream().replace(/;$/, '') + 'currentsong?sid=1' : '');
 const au = $('au');
@@ -184,22 +228,25 @@ function pintaCanais() {
       b.onclick = () => escolhe(i); cs.appendChild(b);
     });
   }
-  [...cs.children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === canal)));
-  $('nome').textContent = CANAIS[canal].nome;
+  [...cs.children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === canal && !extra)));
+  $('nome').textContent = nomeAtual();
   const pode = !!stream();
   $('play').disabled = !pode;
   $('aviso').hidden = pode;
-  if (!pode) $('abrir').href = CANAIS[canal].http;           // link de topo para o http: o leitor do proprio celular toca-o
+  if (!pode) $('abrir').href = CANAIS[canal].http;          // (um PAD tem sempre endereco: aqui so' chegam os da lista)           // link de topo para o http: o leitor do proprio celular toca-o
   if (!pode && !quer) mostra('indisponivel'); else if (!quer) mostra('parado');
 }
 function escolhe(i) {
-  if (i === canal) return;
-  canal = i; guarda('canal_nome', CANAIS[i].nome);
+  if (i === canal && !extra) return;
+  canal = i; extra = null; guarda('canal_nome', CANAIS[i].nome);
+  trocou();
+}
+function trocou() {
   $('titulo').textContent = ''; metaOk = true;
   if (quer && !stream()) pausa();
   pintaCanais();
   if (quer) { tentativas = 0; aEsperar = false; fechaAudio(); abre(); meta(); }
-  if (window.SAMMED) SAMMED.canal(stream(), CANAIS[canal].nome);
+  if (window.SAMMED) SAMMED.canal(stream(), nomeAtual());
 }
 pintaCanais();
 au.addEventListener('playing', () => { tentativas = 0; tocou = true; mostra('tocando'); });
@@ -233,12 +280,12 @@ function meta() {
   clearTimeout(tMeta);
   const u = urlTitulo();
   if (!quer || !metaOk || !u) return;
-  const deQuem = canal;
+  const deQuem = stream();
   fetch(u, {cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer'})
     .then(r => (r.ok ? r.text() : Promise.reject()))
-    .then(t => { if (deQuem !== canal) return; t = t.trim(); $('titulo').textContent = t; $('agora').hidden = !(quer && t); })
+    .then(t => { if (deQuem !== stream()) return; t = t.trim(); $('titulo').textContent = t; $('agora').hidden = !(quer && t); })
     .catch(() => { metaOk = false; })
-    .finally(() => { if (metaOk && quer && deQuem === canal) { clearTimeout(tMeta); tMeta = setTimeout(meta, 30000); } });
+    .finally(() => { if (metaOk && quer && deQuem === stream()) { clearTimeout(tMeta); tMeta = setTimeout(meta, 30000); } });
 }
 
 // ---- instalar como app ----
@@ -251,7 +298,111 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedido
 $('instalar').onclick = () => { $('faixa-inst').hidden = true; if (pedido) { pedido.prompt(); pedido = null; } };
 $('faixa-inst-x').onclick = () => { $('faixa-inst').hidden = true; guarda('faixa-inst', '1'); };
 // (2.0) os MEDIDORES: RTA, espectro, LUFS, true-peak e dBTP do canal, em tela grande (medidos numa copia; o leitor nao muda)
-$('med').onclick = () => SAMMED.abrir({url: stream(), nome: CANAIS[canal].nome});
+$('med').onclick = () => SAMMED.abrir({url: stream(), nome: nomeAtual(), pads: PADS_MED});
+
+// ---- (2.3) o SISTEMA: a area do dono, com a senha. So' se guarda o SHA-256 da senha (a senha nao se escreve em lado nenhum);
+// o SHA-256 e' feito aqui em JavaScript (o crypto.subtle so' existe em https e falta nas WebView antigas) ----
+const HASH_SISTEMA = 'd43403a2c3dae4e4332bf99111e6e066ecda233354d5fa44484dff058e483bb8';
+const ror = (x, r) => (x >>> r) | (x << (32 - r));
+function sha256(s) {
+  const P = [];
+  for (let c = 2; P.length < 64; c++) if (P.every(p => c % p)) P.push(c);
+  const K = P.map(p => (Math.pow(p, 1 / 3) * 4294967296) | 0);
+  let h = P.slice(0, 8).map(p => (Math.sqrt(p) * 4294967296) | 0);
+  const b = unescape(encodeURIComponent(String(s))), bits = b.length * 8, W = [];
+  let t = b + '\x80'; while (t.length % 64 !== 56) t += '\0';
+  for (let i = 0; i < t.length; i++) W[i >> 2] |= t.charCodeAt(i) << ((3 - i % 4) * 8);
+  W.push((bits / 4294967296) | 0, bits | 0);
+  for (let j = 0; j < W.length; j += 16) {
+    const w = W.slice(j, j + 16); let [a, b2, c, d, e, f, g, k] = h;
+    for (let i = 0; i < 64; i++) {
+      if (i >= 16) { const x = w[i - 15], y = w[i - 2]; w[i] = (w[i - 16] + (ror(x, 7) ^ ror(x, 18) ^ (x >>> 3)) + w[i - 7] + (ror(y, 17) ^ ror(y, 19) ^ (y >>> 10))) | 0; }
+      const t1 = (k + (ror(e, 6) ^ ror(e, 11) ^ ror(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((ror(a, 2) ^ ror(a, 13) ^ ror(a, 22)) + ((a & b2) ^ (a & c) ^ (b2 & c))) | 0;
+      k = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b2; b2 = a; a = (t1 + t2) | 0;
+    }
+    h = [a, b2, c, d, e, f, g, k].map((v, i) => (v + h[i]) | 0);
+  }
+  return h.map(v => ('00000000' + (v >>> 0).toString(16)).slice(-8)).join('');
+}
+// os PADS: so' http:// ou https:// (sem espacos nem aspas), ate' 300 caracteres; o nome ate' 24
+const NPADS = 10;
+const nomeLimpo = n => String(n || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24).trim();
+const urlSegura = u => { u = String(u || '').trim(); return u.length <= 300 && /^https?:\/\/[^\s"'<>\\\/][^\s"'<>\\]*$/i.test(u) ? u : null; };
+function abreSistema() {
+  const d = document;      // os MEDIDORES em tela cheia tapariam a janela: sai-se da tela cheia (os medidores ficam abertos)
+  if (d.fullscreenElement || d.webkitFullscreenElement) try { (d.exitFullscreen || d.webkitExitFullscreen).call(d); } catch (e) { /* */ }
+  $('sis').hidden = false; $('sis-entrar').hidden = false; $('sis-pads').hidden = true; $('sis-lista').textContent = '';
+  $('sis-senha').value = ''; $('sis-erro').hidden = true; $('sis-msg').textContent = '';
+  setTimeout(() => $('sis-senha').focus(), 50);
+}
+function fechaSistema() { $('sis').hidden = true; $('sis-lista').textContent = ''; $('sis-senha').value = ''; }
+let sisEspera = 0;
+$('sis-entrar').onsubmit = ev => {
+  ev.preventDefault();
+  const s = $('sis-senha').value; $('sis-senha').value = '';
+  if (Date.now() < sisEspera) return;
+  if (sha256(s) === HASH_SISTEMA) { $('sis-entrar').hidden = true; $('sis-pads').hidden = false; linhasPads(padsDoSistema()); return; }
+  sisEspera = Date.now() + 1500; $('sis-erro').hidden = false;
+};
+function linhasPads(l) {
+  const c = $('sis-lista'); c.textContent = '';
+  for (let i = 0; i < NPADS; i++) {
+    const p = l[i] || {nome: '', url: ''}, r = document.createElement('div'); r.className = 'lin';
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = String(i + 1);
+    const a = document.createElement('input'); a.className = 'nm'; a.maxLength = 24; a.placeholder = 'nome'; a.value = p.nome || ''; a.setAttribute('aria-label', 'Pad ' + (i + 1) + ': nome');
+    const u = document.createElement('input'); u.className = 'u'; u.type = 'url'; u.maxLength = 300; u.placeholder = 'https://…'; u.value = p.url || '';
+    u.setAttribute('aria-label', 'Pad ' + (i + 1) + ': endereço'); u.autocomplete = 'off'; u.spellcheck = false; u.setAttribute('autocapitalize', 'off');
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕'; x.title = 'Limpar este pad'; x.setAttribute('aria-label', 'Limpar o pad ' + (i + 1));
+    x.onclick = () => { a.value = ''; u.value = ''; $('sis-msg').textContent = ''; };
+    r.append(n, a, u, x); c.appendChild(r);
+  }
+}
+$('sis-salvar').onclick = () => {
+  const o = [], rs = [...$('sis-lista').children], m = $('sis-msg');
+  for (let i = 0; i < rs.length; i++) {
+    const nm = rs[i].querySelector('.nm'), ue = rs[i].querySelector('.u'), u0 = ue.value.trim();
+    let n = nomeLimpo(nm.value);
+    if (!u0) { o.push({nome: '', url: ''}); continue; }
+    const u = urlSegura(u0);
+    if (!u) { m.className = 'msg erro'; m.textContent = 'Pad ' + (i + 1) + ': o endereço tem de começar por http:// ou https:// (sem espaços, até 300 caracteres).'; ue.focus(); return; }
+    if (!n) n = 'PAD ' + (i + 1);
+    o.push({nome: n, url: u});
+  }
+  const r = gravaPads(o);
+  if (r) { m.className = 'msg erro'; m.textContent = 'Não guardou: ' + r; return; }
+  linhasPads(padsDoSistema()); m.className = 'msg ok'; m.textContent = 'Guardado ✓';
+};
+$('sis-limpar').onclick = () => { [...$('sis-lista').querySelectorAll('input')].forEach(x => (x.value = '')); $('sis-msg').className = 'msg'; $('sis-msg').textContent = 'Limpos (falta Salvar)'; };
+$('sis-padrao').onclick = () => { linhasPads(padsPadrao()); $('sis-msg').className = 'msg'; $('sis-msg').textContent = 'Os 4 canais nos pads 1-4 (falta Salvar)'; };
+$('sis-fechar').onclick = fechaSistema;
+$('sistema').onclick = abreSistema;
+// com o SISTEMA aberto as teclas sao dele (os MEDIDORES por baixo nao as recebem: o espaco, o R, o Esc)
+window.addEventListener('keydown', ev => { if ($('sis').hidden) return; ev.stopPropagation(); if (ev.key === 'Escape') fechaSistema(); }, true);
+// ---- (2.3) os 10 PADS dos MEDIDORES: guardados so' neste aparelho (localStorage «pads»); por omissao os 4 canais em 1-4 ----
+function padsPadrao() { return Array.from({length: NPADS}, (x, i) => (i < CANAIS.length ? {nome: CANAIS[i].nome, url: CANAIS[i].https || CANAIS[i].http} : {nome: '', url: ''})); }
+function padsDoSistema() {
+  let g = null; try { g = JSON.parse(le('pads') || 'null'); } catch (e) { g = null; }
+  if (!Array.isArray(g)) return padsPadrao();
+  return Array.from({length: NPADS}, (x, i) => { const q = g[i], u = q && urlSegura(q.url); return u ? {nome: nomeLimpo(q.nome) || 'PAD ' + (i + 1), url: u} : {nome: '', url: ''}; });
+}
+function gravaPads(l) { try { localStorage.setItem('pads', JSON.stringify(l)); } catch (e) { return 'este navegador não deixa guardar'; } PADS = padsDoSistema(); return ''; }
+let PADS = padsDoSistema(), padUlt = -1;
+const canalDaUrl = u => CANAIS.findIndex(c => u === c.http || u === c.https);
+const casaPad = p => !!(p && p.url) && (extra ? p.url === extra.url : p.url === CANAIS[canal].http || p.url === CANAIS[canal].https);
+function padAtivo() { if (!quer) return -1; if (casaPad(PADS[padUlt])) return padUlt; return PADS.findIndex(casaPad); }
+// tocar o PAD i: um canal da lista vai como o botao do canal; outro endereco toca por cima (e os medidores passam a medi-lo)
+function tocaPad(i) {
+  const p = PADS[i], u = p && urlSegura(p.url);
+  if (!u) return;
+  padUlt = i;
+  const k = canalDaUrl(u);
+  if (k >= 0) escolhe(k);
+  else if (!extra || extra.url !== u) { extra = {nome: p.nome || 'PAD ' + (i + 1), url: u}; trocou(); }
+  if (!quer) toca();
+}
+const PADS_MED = {lista: () => PADS, tocar: tocaPad, editar: () => abreSistema(), ativo: padAtivo};
+
 if ('serviceWorker' in navigator && SEGURA) navigator.serviceWorker.register('sw.js').catch(() => { /* */ });
 </script>
 </body>

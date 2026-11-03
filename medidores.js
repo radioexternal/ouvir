@@ -1,4 +1,4 @@
-// SAM WEB RADIO FREE - os MEDIDORES 2.1 (02/11). Serve a pagina web e a app Android (o mesmo ficheiro).
+// SAM WEB RADIO FREE - os MEDIDORES 2.3 (03/11). Serve a pagina web, a app Android e (2.2) a pagina da AIR MAX PRO (o mesmo ficheiro).
 // 2.0: RTA de 1/3 de oitava ou ESPECTRO (FFT 4096), loudness BS.1770 (momentaneo 400 ms, curto 3 s, programa com as portas
 // -70 / -10), true-peak 4x (dBTP), barras L/R, Mid/Side, correlacao e balanco.
 // 2.1: dois ecras - L|R (RTA, VU e CASCATA de cada canal, os numeros ao centro) e L+R (a soma, como na 2.0, mais VU e cascata);
@@ -7,6 +7,17 @@
 // O som MEDE-SE NUMA COPIA do canal (um <audio> escondido, com CORS, ligado ao AudioContext com ganho 0): o leitor principal
 // nao muda, o volume nao entra na medida (e' o nivel real da emissora) e, se o servidor nao deixar ler, so' os medidores ficam sem sinal.
 // Uso: SAMMED.abrir({url: '<stream>', nome: '<canal>'}); SAMMED.canal(url, nome) ao trocar; SAMMED.fechar().
+// 2.2 (03/11): o MODO SERVIDOR para a SAM MATRIX AIR MAX PRO (o audio esta' na maquina do ar, nao no navegador):
+// SAMMED.abrir({servidor: {base: '', ponto: 'saida', estado: () => <o ultimo /api/estado>, permite: () => <true/false>},
+// produto: 'SAM MATRIX AIR MAX PRO', nome: '...'}). So' com o ecra aberto e a pagina a' vista: GET /api/espectro-audio (~5/s; as 61
+// bandas de 1/6 de oitava juntam-se em potencia em 1/3 e fazem a cascata), GET /api/audio?n=1024 (~5/s: o goniometro, o pico, o
+// true-peak 4x estimado aqui, a correlacao, o balanco) e o loudness (m/s/i) do /api/estado (o da pagina; so' se ele parar se pede
+// aqui, 2/s). Um pedido de cada vez por fonte, recuo nas falhas (1 -> 8 s), nada com o ecra fechado. O modo do stream nao muda.
+// 2.3 (03/11): ESTILO do RTA (AZUL -> BARRAS -> LINHA -> PREENCHIDO; L|R comeca em AZUL, L+R em BARRAS ate' o utilizador escolher,
+// guardado); no L+R os VU L e R por cima do VU L+R; os 10 PADS de acesso rapido (so' no L+R e so' se a pagina os der):
+// SAMMED.abrir({..., pads: {lista: () => [{nome, url} x10], tocar: i => {...}, editar: () => {...}, ativo: () => i}}).
+// Daqui so' se mostram os NOMES (nunca o endereco) e nada se guarda dos pads; editar e' da pagina (com a senha do SISTEMA).
+// No modo servidor nao ha' pads.
 (function () {
   'use strict';
   const BANDAS = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
@@ -23,17 +34,34 @@
       e_nav: 'this browser has no audio to measure', PROG: 'PROGRAM LOUDNESS', LKFS: 'LKFS (PGM)', TP: 'TRUE-PEAK MAX', REC: 'RECONSTRUCTED PEAK',
       PLR: 'PLR', CURTO: 'SHORT-TERM (3 s)', MOM: 'MOMENTARY (400 ms)', CORR: 'CORRELATION', MS: 'MID/SIDE', BAL: 'BALANCE', ESC: 'SCALES',
       CASC: 'WATERFALL', CASC_C: 'WATERF.', GANHO: 'GAIN', FREQ: 'Frequency', NIVEL: 'Level', ESPEC: 'SPECTRUM', esq: 'LEFT L', dir: 'RIGHT R',
-      pico: 'Peak', b_espec: 'SPECTRUM', b_casc: 'WATERFALL', b_pico: 'PEAK', b_escala: 'SCALE −80', b_tela: 'SCREEN', b_fechar: '✕ CLOSE', dlg: 'Meters'},
+      pico: 'Peak', b_espec: 'SPECTRUM', b_casc: 'WATERFALL', b_pico: 'PEAK', b_escala: 'SCALE −80', b_tela: 'SCREEN', b_fechar: '✕ CLOSE', dlg: 'Meters',
+      liga_s: 'reading the processor…', e_srv: 'no answer from the processor — retrying', e_vazio: 'no audio at this point yet',
+      eco: 'SPECTRUM · RTA · WATERFALL off in ⚡ RESOURCES (saving CPU)', eco_c: 'OFF · ⚡ RESOURCES',
+      b_estilo: 'STYLE', st_blue: 'BLUE', st_bars: 'BARS', st_line: 'LINE', st_fill: 'FILL', PADS: 'PADS', EDIT: '✎ EDIT'},
     PT: {titulo: 'SAM WEB RADIO FREE · MEDIDORES', curto: 'MEDIDORES', est: 'ESTÉREO L | R', soma: 'L+R (SOMA)', liga: 'a ligar ao canal…',
       e_nao: 'este canal não deixa medir', e_ler: 'não deu para ler o canal', e_cai: 'o canal não deixa medir (ou caiu) — tento de novo',
       e_nav: 'este navegador não tem áudio para medir', PROG: 'LOUDNESS DE PROGRAMA', LKFS: 'LKFS (PGM)', TP: 'TRUE-PEAK MÁX.', REC: 'PICO RECONSTRUÍDO',
       PLR: 'PLR', CURTO: 'CURTO PRAZO (3 s)', MOM: 'MOMENTÂNEO (400 ms)', CORR: 'CORRELAÇÃO', MS: 'MID/SIDE', BAL: 'BALANÇO', ESC: 'ESCALAS',
       CASC: 'CASCATA', CASC_C: 'CASC.', GANHO: 'GANHO', FREQ: 'Frequência', NIVEL: 'Nível', ESPEC: 'ESPECTRO', esq: 'ESQUERDO L', dir: 'DIREITO R',
-      pico: 'Pico', b_espec: 'ESPECTRO', b_casc: 'CASCATA', b_pico: 'PICO', b_escala: 'ESCALA −80', b_tela: 'TELA', b_fechar: '✕ FECHAR', dlg: 'Medidores'},
+      pico: 'Pico', b_espec: 'ESPECTRO', b_casc: 'CASCATA', b_pico: 'PICO', b_escala: 'ESCALA −80', b_tela: 'TELA', b_fechar: '✕ FECHAR', dlg: 'Medidores',
+      liga_s: 'a ler o processador…', e_srv: 'o processador não responde — tento de novo', e_vazio: 'ainda sem áudio neste ponto',
+      eco: 'ESPECTRO · RTA · CASCATA desligados em ⚡ RECURSOS (poupar CPU)', eco_c: 'DESLIGADO · ⚡ RECURSOS',
+      b_estilo: 'ESTILO', st_blue: 'AZUL', st_bars: 'BARRAS', st_line: 'LINHA', st_fill: 'PREENCHIDO', PADS: 'PADS', EDIT: '✎ EDITAR'},
   };
-  const ops = {espectro: false, pico: true, e80: false, modo: 'LR', lingua: 'EN', ganhos: {rta: 0, vu: 0, cascata: 0}, gate: -80, cascata: true};
-  try { const v = localStorage.getItem('sammed.lingua'); if (v === 'PT' || v === 'EN') ops.lingua = v; } catch (e) { /* sem armazenamento */ }
-  const guarda = () => { try { localStorage.setItem('sammed.lingua', ops.lingua); } catch (e) { /* */ } };
+  let gateMexido = false;   // (2.2) o gate que o produto sugere so' vale enquanto o utilizador nao mexer
+  const ops = {espectro: false, pico: true, e80: false, modo: 'LR', lingua: 'EN', ganhos: {rta: 0, vu: 0, cascata: 0}, gate: -80, cascata: true,
+    estilo: null};             // (2.3) null = o de cada ecra (L|R azul, L+R barras) ate' o utilizador escolher
+  let linguaFixa = false;      // (2.2) a escolha guardada vence a lingua que a pagina sugere
+  try { const v = localStorage.getItem('sammed.lingua'); if (v === 'PT' || v === 'EN') { ops.lingua = v; linguaFixa = true; } } catch (e) { /* sem armazenamento */ }
+  const guarda = () => { linguaFixa = true; try { localStorage.setItem('sammed.lingua', ops.lingua); } catch (e) { /* */ } };
+  const ESTILOS = ['blue', 'bars', 'line', 'fill'];
+  try { const v = localStorage.getItem('sammed.estilo'); if (ESTILOS.indexOf(v) >= 0) ops.estilo = v; } catch (e) { /* */ }
+  const estilo = () => (ESTILOS.indexOf(ops.estilo) >= 0 ? ops.estilo : ops.modo === 'SOMA' ? 'bars' : 'blue');
+  const proxEstilo = () => { ops.estilo = ESTILOS[(ESTILOS.indexOf(estilo()) + 1) % ESTILOS.length]; try { localStorage.setItem('sammed.estilo', ops.estilo); } catch (e) { /* */ } };
+  // (2.3) os PADS: so' o que a pagina der (os nomes); nada daqui se guarda
+  let PADS = null, padsZ = [], vusZ = [], editZ = null;
+  const padsLista = () => { try { const l = PADS && PADS.lista ? PADS.lista() : null; return Array.isArray(l) ? l : []; } catch (e) { return []; } };
+  const padsAtivo = () => { try { const a = PADS && PADS.ativo ? PADS.ativo() : -1; return typeof a === 'number' ? a : -1; } catch (e) { return -1; } };
   const T = k => (TX[ops.lingua] || TX.EN)[k] || TX.EN[k] || k;
 
   // ---- o processamento de cada amostra (corre no AudioWorklet; o mesmo texto serve de reserva no ScriptProcessor) ----
@@ -178,12 +206,19 @@
     if (t < 0) { d[o] = d[o + 1] = d[o + 2] = 0; } else { const i = Math.round(lim(t, 0, 1) * 255) * 3; d[o] = LUT[i]; d[o + 1] = LUT[i + 1]; d[o + 2] = LUT[i + 2]; }
     d[o + 3] = 255;
   }
+  const LBUF = new Float64Array(NC);
   function linha(C, p, fs) {
-    const m = mapaCol(fs); C.wi = (C.wi + 1) % NR; const base = C.wi * NC;
+    const m = mapaCol(fs);
     for (let c = 0; c < NC; c++) { const q = m[c]; let v;
       if (!q[0]) v = pdb(p[q[1]]) * (1 - q[2]) + pdb(p[q[1] + 1]) * q[2];
       else { let mx = 0; for (let k = q[1]; k <= q[2]; k++) if (p[k] > mx) mx = p[k]; v = pdb(mx); }
-      C.wf[base + c] = v; }
+      LBUF[c] = v; }
+    linhaV(C, LBUF);
+  }
+  // (2.2) uma linha ja' em dB (NC colunas): a do stream (acima) e a do servidor (as 61 bandas interpoladas)
+  function linhaV(C, v) {
+    C.wi = (C.wi + 1) % NR; const base = C.wi * NC;
+    for (let c = 0; c < NC; c++) C.wf[base + c] = v[c];
     if (C.oc && C.chave === chaveCasc()) {
       C.ox.drawImage(C.oc, 0, 0, NC, NR - 1, 0, 1, NC, NR - 1);
       if (!C.lin) C.lin = C.ox.createImageData(NC, 1);
@@ -270,7 +305,7 @@
   }
 
   // ---- o desenho (tela virtual que enche o ecra: base 1200 x 560 deitado, 420 x 740 em pe') ----
-  let cv = null, cx = null, esc = 1, deitado = true, nomeCanal = '', erro = '', zonas = [], areas = [], linguaPintada = '';
+  let cv = null, cx = null, esc = 1, deitado = true, nomeCanal = '', produto = '', erro = '', zonas = [], areas = [], linguaPintada = '';
   const fmt = (v, c = 1) => (v < 0 ? '−' : '') + Math.abs(v).toFixed(c).replace('.', ops.lingua === 'PT' ? ',' : '.');
   const fmtS = (v, c = 1) => (v > 0.04 ? '+' : '') + fmt(v, c);
   const fmtG = v => (v > 0 ? '+' + v : v < 0 ? '−' + -v : '0');
@@ -286,7 +321,7 @@
     zonas.push({x: x - 4, y: y - 4, w: w + 8, h: h + 8, f});
   }
   function muda(k, d) {
-    if (k === 'gate') ops.gate = lim(ops.gate + d, -120, -20);
+    if (k === 'gate') { ops.gate = lim(ops.gate + d, -120, -20); gateMexido = true; }
     else ops.ganhos[k] = lim((ops.ganhos[k] || 0) + d, -30, 30);
   }
   // [GANHO +10 dB][▼][▲] alinhado a' direita em xr; devolve o x onde comeca
@@ -316,11 +351,11 @@
     esc = !deitado ? Math.min(W / 420, Hh / 740) : baixo ? Math.min(Hh / 420, W / 1000) : Math.min(W / 1200, Hh / 560);
     const VW = W / esc, VH = Hh / esc, LR = ops.modo !== 'SOMA';
     cx.setTransform(dpr * esc, 0, 0, dpr * esc, 0, 0); cx.fillStyle = FUNDO; cx.fillRect(0, 0, VW, VH);
-    zonas = []; areas = [];
-    const ce = [ops.lingua, ops.modo, ops.espectro, ops.cascata, ops.pico, ops.e80].join('|');
+    zonas = []; areas = []; padsZ = []; vusZ = []; editZ = null;
+    const ce = [ops.lingua, ops.modo, ops.espectro, ops.cascata, ops.pico, ops.e80, estilo()].join('|');
     if (ce !== linguaPintada && pinta) { pinta(); linguaPintada = ce; }
     cabecalho(VW, LR);
-    if (!L) { texto(T(erro || 'liga'), VW / 2, VH / 2, erro ? AMBAR : ROT, 18, '600', 'center'); return; }
+    if (!L) { texto(T(erro || (SRV.on ? 'liga_s' : 'liga')), VW / 2, VH / 2, erro ? AMBAR : ROT, 18, '600', 'center'); return; }
     const P = 8, G = 8, top = 28, bot = VH - P, alt = bot - top;
     if (deitado) {
       if (LR && baixo) {
@@ -334,44 +369,91 @@
         const hg = lim(alt * 0.27, 120, 200), hb = 48, hs = 84, hn = alt - hg - hb - hs - 3 * G;
         gonio(xc, top, cw, hg); numeros(xc, top + hg + G, cw, hn, 1); balanco(xc, top + hg + G + hn + G, cw, hb); escalas(xc, bot - hs, cw, hs);
       } else {
-        const rw = lim(VW * 0.24, 270, 340), cw = lim(VW * 0.21, 240, 300), lw = VW - 2 * P - rw - cw - 2 * G, xc = P + lw + G, xr = xc + cw + G;
+        // (2.3) com PADS: a coluna da direita mais larga, o goniometro mais baixo e (telemovel deitado) sem o painel ESCALAS
+        // (os ganhos continuam nos botoes de cada painel)
+        const pd = !!PADS, semEsc = pd && baixo;
+        const rw = pd ? lim(VW * 0.28, 300, 380) : lim(VW * 0.24, 270, 340), cw = lim(VW * 0.21, 240, 300), lw = VW - 2 * P - rw - cw - 2 * G, xc = P + lw + G, xr = xc + cw + G;
         coluna(CH.S, P, top, lw, alt, 'S'); numeros(xc, top, cw, alt, 1);
-        const hg = lim(alt * 0.27, 120, 190), hb = 48, hs = 84, hv = alt - hg - hb - hs - 3 * G;
-        gonio(xr, top, rw, hg); barrasLR(xr, top + hg + G, rw, hv); balanco(xr, top + hg + G + hv + G, rw, hb); escalas(xr, bot - hs, rw, hs);
+        const hg = pd ? lim(alt * 0.22, 90, 160) : lim(alt * 0.27, 120, 190), hb = 48, hs = semEsc ? 0 : 84, hv = alt - hg - hb - hs - (semEsc ? 2 : 3) * G;
+        gonio(xr, top, rw, hg); barrasLR(xr, top + hg + G, rw, hv); balanco(xr, top + hg + G + hv + G, rw, hb); if (!semEsc) escalas(xr, bot - hs, rw, hs);
       }
     } else {
-      const lw = VW - 2 * P, w2 = (lw - G) / 2, hn = 4 * 40 + 3 * 4;
+      const hp = !LR && PADS ? 104 : 0;      // (2.3) os PADS em pe' (5 x 2): os numeros, os VU e a linha de baixo mais baixos
+      const lw = VW - 2 * P, w2 = (lw - G) / 2, hn = hp ? 4 * 34 + 3 * 4 : 4 * 40 + 3 * 4;
       numeros(P, top, lw, hn, 2);
       let y = top + hn + G;
-      const hBot = 152, hvu = LR ? 2 * 26 + 4 : 26, livre = bot - y - hBot - hvu - (ops.cascata ? 3 : 2) * G;
-      const hr = Math.round(ops.cascata ? livre * 0.5 : livre), hw = livre - (ops.cascata ? hr : livre);
+      const hBot = hp ? 124 : 152, hvu = LR ? 2 * 26 + 4 : 3 * (hp ? 18 : 22) + 2 * 4, livre = bot - y - hBot - hvu - hp - (ops.cascata ? 3 : 2) * G - (hp ? G : 0);
+      const hr = Math.round(ops.cascata ? livre * (hp ? 0.58 : 0.5) : livre), hw = livre - (ops.cascata ? hr : livre);
       if (LR) { rta(CH.L, P, y, w2, hr, 'L'); rta(CH.R, P + w2 + G, y, w2, hr, 'R'); } else rta(CH.S, P, y, lw, hr, 'S');
       y += hr + G;
-      if (LR) { vuH(P, y, lw, 26, 'L'); vuH(P, y + 30, lw, 26, 'R'); } else vuH(P, y, lw, 26, 'S');
+      if (LR) { vuH(P, y, lw, 26, 'L'); vuH(P, y + 30, lw, 26, 'R'); } else vus3(P, y, lw, hp ? 18 : 22);
       y += hvu + G;
       if (ops.cascata) { if (LR) { cascata(CH.L, P, y, w2, hw, 'L'); cascata(CH.R, P + w2 + G, y, w2, hw, 'R'); } else cascata(CH.S, P, y, lw, hw, 'S'); y += hw + G; }
+      if (hp) { painel(P, y, lw, hp); padsGrade(P + 8, y + 6, lw - 16, hp - 12, 5, 2); y += hp + G; }
       gonio(P, y, w2, hBot); balanco(P + w2 + G, y, w2, 48); escalas(P + w2 + G, y + 48 + 6, w2, hBot - 54);
     }
   }
+  // o nome de um pad em 1 ou 2 linhas (corta nas palavras; o resto com …)
+  function linhasNome(s, mx, tz, duas) {
+    if (larg(s, tz, '700') <= mx || !duas) return [corta(s, mx, tz, '700')];
+    const p = s.split(' '); let a = p[0], k = 1;
+    while (k < p.length && larg(a + ' ' + p[k], tz, '700') <= mx) a += ' ' + p[k++];
+    return k >= p.length ? [corta(a, mx, tz, '700')] : [corta(a, mx, tz, '700'), corta(p.slice(k).join(' '), mx, tz, '700')];
+  }
+  // (2.3) no L+R: VU L, VU R e VU L+R, um por cima do outro (os botoes do ganho do VU so' no L+R)
+  function vus3(X, Y, Wd, h) { vuH(X, Y, Wd, h, 'L', true); vuH(X, Y + h + 4, Wd, h, 'R', true); vuH(X, Y + 2 * (h + 4), Wd, h, 'S'); }
+  // um retangulo de cantos redondos (sem roundRect: as WebView antigas nao o tem)
+  function redondo(x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2); cx.beginPath(); cx.moveTo(x + r, y); cx.arcTo(x + w, y, x + w, y + h, r); cx.arcTo(x + w, y + h, x, y + h, r);
+    cx.arcTo(x, y + h, x, y, r); cx.arcTo(x, y, x + w, y, r); cx.closePath();
+  }
+  // (2.3) os 10 PADS: o titulo + ✎ EDITAR na linha de cima e a grelha por baixo (2 colunas: 1-5 a' esquerda, 6-10 a' direita;
+  // 5 colunas: 1-5 em cima). Tocar num pad com nome chama pads.tocar(i); o que toca tem o contorno azul e o ▶.
+  function padsGrade(X, Y, Wd, Ht, cols, rows) {
+    const lista = padsLista(), at = padsAtivo(), eh = 18, ew = Math.min(Wd * 0.55, larg(T('EDIT'), 11, '700') + 16);
+    texto(T('PADS'), X, Y + 13, ROT, 10.5, '700');
+    botao(X + Wd - ew, Y, ew, eh, T('EDIT'), () => { try { if (PADS && PADS.editar) PADS.editar(); } catch (e) { /* */ } }); editZ = {x: X + Wd - ew, y: Y, w: ew, h: eh};
+    const g = 6, y0 = Y + eh + 6, pw = (Wd - (cols - 1) * g) / cols, ph = (Ht - (y0 - Y) - (rows - 1) * g) / rows;
+    if (pw < 20 || ph < 12) return;
+    const tz = lim(Math.min(ph * 0.4, pw / 7), 10, 14);
+    for (let i = 0; i < cols * rows; i++) {
+      const c = cols < rows ? Math.floor(i / rows) : i % cols, r = cols < rows ? i % rows : Math.floor(i / cols);
+      const x = X + c * (pw + g), y = y0 + r * (ph + g), p = lista[i] || null;
+      const nome = p && typeof p.nome === 'string' ? p.nome.trim() : '', tem = !!(p && (nome || p.url)), ativo = tem && i === at;
+      redondo(x + 0.5, y + 0.5, pw - 1, ph - 1, 7);
+      cx.fillStyle = ativo ? '#0c2638' : tem ? '#1d1f24' : '#121316'; cx.fill();
+      cx.lineWidth = ativo ? 2.5 : 1; cx.strokeStyle = ativo ? AZUL : tem ? '#4e5056' : '#2c2e33'; cx.stroke(); cx.lineWidth = 1;
+      if (ph >= 30) texto(String(i + 1), x + 6, y + 11, ativo ? AZUL : '#6b6e74', 9, '700');
+      const s = tem ? (ativo ? '▶ ' : '') + (nome || 'PAD ' + (i + 1)) : '—', cor = ativo ? AZUL : tem ? '#e8eaed' : '#55585e';
+      const tl = ph >= 36 ? tz - 1 : tz, ls = linhasNome(s, pw - 12, tl, ph >= 36), yc = y + ph / 2 + (ph > 30 ? 3 : 1);
+      if (ls.length === 1) texto(ls[0], x + pw / 2, yc + tz * 0.36, cor, tz, '700', 'center');
+      else { texto(ls[0], x + pw / 2, yc - tl * 0.22, cor, tl, '700', 'center'); texto(ls[1], x + pw / 2, yc + tl * 0.94, cor, tl, '700', 'center'); }
+      padsZ.push({i, x, y, w: pw, h: ph, tem});
+      if (tem) zonas.push({x, y, w: pw, h: ph, f: () => { try { if (PADS && PADS.tocar) PADS.tocar(i); } catch (e) { /* */ } }});
+    }
+  }
   function cabecalho(VW, LR) {
-    const tam = deitado ? 13 : 12, esq = (deitado ? T('titulo') : T('curto')) + ' · ' + (LR ? T('est') : T('soma'));
+    const tam = deitado ? 13 : 12, tit = deitado ? (produto ? produto + ' · ' + T('curto') : T('titulo')) : T('curto');
+    const esq = tit + ' · ' + (LR ? T('est') : T('soma'));
     texto(esq, 8, 18, '#e6e8eb', tam, '700');
     const x0 = 8 + larg(esq, tam, '700') + 16, mx = VW - 8 - x0;
     let dir, cor = AZUL;
-    if (erro) { dir = '⚠ ' + T(erro); cor = AMBAR; } else dir = (nomeCanal || 'SAM FREE') + (L ? ' · ' + fmt(L.fs / 1000, L.fs % 1000 ? 1 : 0) + ' kHz' : '');
+    const av = erro || (SRV.on && SRV.semEsp ? 'eco' : '');
+    if (av) { dir = '⚠ ' + T(av); cor = AMBAR; } else dir = (nomeCanal || 'SAM FREE') + (L ? ' · ' + fmt(L.fs / 1000, L.fs % 1000 ? 1 : 0) + ' kHz' : '');
     if (mx > 30) texto(corta(dir, mx, tam, '700'), VW - 8, 18, cor, tam, '700', 'right');
   }
   function coluna(C, X, Y, Wd, Ht, tag) {
-    const hv = 28, G = 8;
-    if (ops.cascata) { const hr = Math.round((Ht - hv - 2 * G) * 0.5); rta(C, X, Y, Wd, hr, tag); vuH(X, Y + hr + G, Wd, hv, tag); cascata(C, X, Y + hr + G + hv + G, Wd, Ht - hr - hv - 2 * G, tag); }
-    else { rta(C, X, Y, Wd, Ht - hv - G, tag); vuH(X, Y + Ht - hv, Wd, hv, tag); }
+    const S = tag === 'S', hv = S ? 3 * 20 + 2 * 4 : 28, G = 8;      // (2.3) no L+R: VU L, VU R e VU L+R (mais finos)
+    const vu = y => (S ? vus3(X, y, Wd, 20) : vuH(X, y, Wd, hv, tag));
+    if (ops.cascata) { const hr = Math.round((Ht - hv - 2 * G) * 0.5); rta(C, X, Y, Wd, hr, tag); vu(Y + hr + G); cascata(C, X, Y + hr + G + hv + G, Wd, Ht - hr - hv - 2 * G, tag); }
+    else { rta(C, X, Y, Wd, Ht - hv - G, tag); vu(Y + Ht - hv); }
   }
   const MOSTRA = [[31.5, '31.5'], [63, '63'], [125, '125'], [250, '250'], [500, '500'], [1000, '1k'], [2000, '2k'], [4000, '4k'], [8000, '8k'], [16000, '16k']];
   const MOSTRA_C = [[63, '63'], [250, '250'], [1000, '1k'], [4000, '4k'], [16000, '16k']];
   function rta(C, X, Y, Wd, Ht, tag) {
     painel(X, Y, Wd, Ht);
     const estreito = Wd < 330, esp = ops.espectro && !!C.esp, soma = tag === 'S', g = ops.ganhos.rta;
-    const tit = esp ? T('ESPEC') : estreito ? 'RTA' : 'RTA 1/3';
+    const tit = esp ? T('ESPEC') + (SRV.on && !estreito ? ' 1/6' : '') : estreito ? 'RTA' : 'RTA 1/3';   // (2.2) o do servidor: 61 bandas de 1/6
     texto(tit, X + 8, Y + 16, AZUL, 13, '700');
     const xg = ganhoCtl(X + Wd - 6, Y + 16, 'rta', estreito), wt = larg(tit, 13, '700');
     const tg = tagTxt(tag, estreito || xg - X - wt < 110);
@@ -393,17 +475,35 @@
     const marcas = Wd < 300 ? MOSTRA_C : MOSTRA;
     areas.push({C, x0, x1, y0: y0 - 8, y1: y1 + 14, esp, lg});
     cx.save(); cx.beginPath(); cx.rect(x0, y0 - 1, x1 - x0, y1 - y0 + 1); cx.clip();
+    // (2.3) o ESTILO: blue = barras azuis com o pico em contorno amarelo; bars = barras amarelas com o pico em risco;
+    // line = so' a linha pelos topos das bandas; fill = so' a area cheia (sem linha). A cor da linha/area: L+R amarelo, L/R azul.
+    const st = estilo(), corT = soma ? AMAR : AZUL;
     if (!esp) {
       const v = rtaMostra(C), gr = cx.createLinearGradient(0, y0, 0, y1);
-      if (soma) { gr.addColorStop(0, AMAR); gr.addColorStop(1, AMAR_E); } else { gr.addColorStop(0, AZUL); gr.addColorStop(1, AZUL_E); }
       const bw = Math.max(1, lg - (lg > 8 ? 4 : 2));
-      for (let b = 0; b < NB; b++) {
-        const xb = x0 + b * lg + (lg - bw) / 2, y = yDb(v[b], y0, y1, min), sel = b === s.b;
-        if (sel) { cx.fillStyle = 'rgba(255,149,0,.22)'; cx.fillRect(xb - 1, y0, bw + 2, y1 - y0); }
-        if (y < y1) { cx.fillStyle = sel ? AMBAR : gr; cx.fillRect(xb, y, bw, y1 - y); }
-        if (ops.pico && C.rp[b] + g > min) { const yp = yDb(C.rp[b] + g, y0, y1, min);
-          if (soma) { cx.fillStyle = '#ebebeb'; cx.fillRect(xb + 1, yp - 4, bw - 2, 2); }
-          else { cx.strokeStyle = AMAR; cx.strokeRect(xb + 0.5, yp + 0.5, bw - 1, y1 - yp - 1); } }
+      if (st === 'blue' || st === 'bars') {
+        if (st === 'bars') { gr.addColorStop(0, AMAR); gr.addColorStop(1, AMAR_E); } else { gr.addColorStop(0, AZUL); gr.addColorStop(1, AZUL_E); }
+        for (let b = 0; b < NB; b++) {
+          const xb = x0 + b * lg + (lg - bw) / 2, y = yDb(v[b], y0, y1, min), sel = b === s.b;
+          if (sel) { cx.fillStyle = 'rgba(255,149,0,.22)'; cx.fillRect(xb - 1, y0, bw + 2, y1 - y0); }
+          if (y < y1) { cx.fillStyle = sel ? AMBAR : gr; cx.fillRect(xb, y, bw, y1 - y); }
+          if (ops.pico && C.rp[b] + g > min) { const yp = yDb(C.rp[b] + g, y0, y1, min);
+            if (st === 'bars') { cx.fillStyle = '#ebebeb'; cx.fillRect(xb + 1, yp - 4, bw - 2, 2); }
+            else { cx.strokeStyle = AMAR; cx.strokeRect(xb + 0.5, yp + 0.5, bw - 1, y1 - yp - 1); } }
+        }
+      } else {
+        const xc = b => x0 + b * lg + lg / 2, sx = xc(s.b);
+        cx.fillStyle = 'rgba(255,149,0,.22)'; cx.fillRect(sx - bw / 2 - 1, y0, bw + 2, y1 - y0);
+        const pts = []; for (let b = 0; b < NB; b++) pts.push([xc(b), yDb(v[b], y0, y1, min)]);
+        cx.beginPath(); cx.moveTo(x0, pts[0][1]); pts.forEach(p => cx.lineTo(p[0], p[1])); cx.lineTo(x1, pts[NB - 1][1]);
+        if (st === 'fill') {
+          cx.lineTo(x1, y1); cx.lineTo(x0, y1); cx.closePath();
+          if (soma) { gr.addColorStop(0, 'rgba(246,226,38,.85)'); gr.addColorStop(1, 'rgba(150,136,20,.25)'); } else { gr.addColorStop(0, 'rgba(79,195,247,.85)'); gr.addColorStop(1, 'rgba(29,79,154,.3)'); }
+          cx.fillStyle = gr; cx.fill();
+        } else { cx.strokeStyle = corT; cx.lineWidth = 1.6; cx.lineJoin = 'round'; cx.stroke(); cx.lineWidth = 1; }
+        if (ops.pico) { cx.fillStyle = '#ebebeb'; const tw = Math.max(2, bw - 2);
+          for (let b = 0; b < NB; b++) if (C.rp[b] + g > min) cx.fillRect(xc(b) - tw / 2, yDb(C.rp[b] + g, y0, y1, min) - 3, tw, 2); }
+        const sy = pts[s.b][1]; if (sy < y1) { cx.fillStyle = AMBAR; cx.beginPath(); cx.arc(sx, sy, 3.5, 0, 2 * Math.PI); cx.fill(); }
       }
     } else {
       const df = L.fs / NFFT, px = Math.round(x1 - x0), pts = [], e = C.esp;
@@ -414,24 +514,25 @@
         pts.push([x0 + i, yDb(v + g, y0, y1, min)]);
       }
       cx.strokeStyle = '#1c1e22'; marcas.forEach(([f]) => { const xx = Math.round(xf(f)) + 0.5; cx.beginPath(); cx.moveTo(xx, y0); cx.lineTo(xx, y1); cx.stroke(); });
-      const gr = cx.createLinearGradient(0, y0, 0, y1);
-      if (soma) { gr.addColorStop(0, 'rgba(246,226,38,.66)'); gr.addColorStop(1, 'rgba(150,136,20,.12)'); } else { gr.addColorStop(0, 'rgba(79,195,247,.66)'); gr.addColorStop(1, 'rgba(29,79,154,.15)'); }
-      cx.beginPath(); cx.moveTo(x0, y1); pts.forEach(p => cx.lineTo(p[0], p[1])); cx.lineTo(x0 + px, y1); cx.closePath(); cx.fillStyle = gr; cx.fill();
-      cx.beginPath(); pts.forEach((p, i) => (i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]))); cx.strokeStyle = soma ? AMAR : AZUL; cx.lineWidth = 1.6; cx.stroke(); cx.lineWidth = 1;
+      const gr = cx.createLinearGradient(0, y0, 0, y1), am = st === 'bars' || (st !== 'blue' && soma);   // (2.3) o estilo tambem no ESPECTRO
+      if (am) { gr.addColorStop(0, 'rgba(246,226,38,.66)'); gr.addColorStop(1, 'rgba(150,136,20,.12)'); } else { gr.addColorStop(0, 'rgba(79,195,247,.66)'); gr.addColorStop(1, 'rgba(29,79,154,.15)'); }
+      if (st !== 'line') { cx.beginPath(); cx.moveTo(x0, y1); pts.forEach(p => cx.lineTo(p[0], p[1])); cx.lineTo(x0 + px, y1); cx.closePath(); cx.fillStyle = gr; cx.fill(); }
+      if (st !== 'fill') { cx.beginPath(); pts.forEach((p, i) => (i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]))); cx.strokeStyle = am ? AMAR : AZUL; cx.lineWidth = 1.6; cx.stroke(); cx.lineWidth = 1; }
       cx.strokeStyle = AMBAR; cx.setLineDash([4, 3]); cx.beginPath(); cx.moveTo(xf(s.f), y0); cx.lineTo(xf(s.f), y1); cx.stroke(); cx.setLineDash([]);
     }
     cx.restore();
     marcas.forEach(([f, t2]) => texto(t2, esp ? xf(f) : x0 + BANDAS.indexOf(f) * lg + lg / 2, y1 + 13, ROT, 10, '', 'center'));
+    if (SRV.on && SRV.semEsp) texto(T('eco_c'), (x0 + x1) / 2, (y0 + y1) / 2, AMBAR, 13, '700', 'center');
   }
-  function vuH(X, Y, Wd, Ht, tag) {
-    painel(X, Y, Wd, Ht);
+  function vuH(X, Y, Wd, Ht, tag, semBotoes) {
+    painel(X, Y, Wd, Ht); vusZ.push(tag);
     const v = tag === 'L' ? vis.vL : tag === 'R' ? vis.vR : Math.max(vis.vL, vis.vR), h = tag === 'L' ? vis.hL : tag === 'R' ? vis.hR : Math.max(vis.hL, vis.hR);
     const g = ops.ganhos.vu, yc = Y + Ht / 2;
     texto(tag === 'S' ? 'L+R' : tag, X + 8, yc + 4.5, '#fff', 12, '700');
     let x0 = X + (tag === 'S' ? 40 : 26);
     if (g) { texto(fmtG(g), x0, yc + 4, AMBAR, 10, '700'); x0 += 26; }
     const xr = X + Wd - 6, bw = 18;
-    botao(xr - bw, yc - 8, bw, 16, '▲', () => muda('vu', 10)); botao(xr - 2 * bw - 4, yc - 8, bw, 16, '▼', () => muda('vu', -10));
+    if (!semBotoes) { botao(xr - bw, yc - 8, bw, 16, '▲', () => muda('vu', 10)); botao(xr - 2 * bw - 4, yc - 8, bw, 16, '▼', () => muda('vu', -10)); }
     const xn = xr - 2 * bw - 10, ns = (h > -119 ? fmtS(h) : '—') + ' dBTP';
     texto(ns, xn, yc + 4.5, h > -1 ? MAG : AMAR, 12, '700', 'right');
     const x1 = xn - 84, a = -60, b = 3, n = Math.max(10, Math.floor((x1 - x0) / 6)), lw = (x1 - x0) / n, sh = Math.min(14, Ht - 10);
@@ -461,6 +562,7 @@
     for (let sg = 0; sg <= NR / 10; sg += ps) texto(sg ? '−' + sg + 's' : '0s', x0 - 3, y0 + (y1 - y0) * sg / (NR / 10) + (sg ? 3 : 8), ROT, 9.5, '', 'right');
     const gr = cx.createLinearGradient(0, y0, 0, y1); for (let i = PAL.length - 1; i >= 0; i--) gr.addColorStop(1 - PAL[i][0], 'rgb(' + PAL[i].slice(1).join(',') + ')');
     cx.fillStyle = gr; cx.fillRect(x1 + 4, y0, 7, y1 - y0); cx.strokeStyle = '#3a3c40'; cx.strokeRect(x1 + 4.5, y0 + 0.5, 6, y1 - y0 - 1);
+    if (SRV.on && SRV.semEsp) { cx.fillStyle = 'rgba(8,9,11,.78)'; cx.fillRect(x0, y0, x1 - x0, y1 - y0); texto(T('eco_c'), (x0 + x1) / 2, (y0 + y1) / 2, AMBAR, 13, '700', 'center'); }
   }
   function cela(x, y, w, h, tit, v, un, ok, cor, dec) {
     painel(x, y, w, h);
@@ -539,11 +641,17 @@
   }
   function barrasLR(X, Y, Wd, Ht) {
     painel(X, Y, Wd, Ht);
-    const g = ops.ganhos.vu, y0 = Y + 30, y1 = Y + Ht - 12, min = -60, w = 26, xl = X + 46, xr = xl + w + 10;
+    const g = ops.ganhos.vu, y0 = Y + 30, y1 = Y + Ht - 12, min = -60, w = PADS ? 22 : 26, xl = X + (PADS ? 42 : 46), xr = xl + w + (PADS ? 8 : 10);
     texto('dBTP', X + 8, Y + 16, ROT, 10.5); texto('L', xl + w / 2, y0 - 6, '#fff', 11, '700', 'center'); texto('R', xr + w / 2, y0 - 6, '#fff', 11, '700', 'center');
     const passo = (y1 - y0) < 90 ? 20 : (y1 - y0) < 150 ? 12 : 6;
     for (let d = 0; d >= min; d -= passo) { const y = yDb(d, y0, y1, min); texto(fmt(d, 0), X + 32, y + 4, ROT, 10, '', 'right'); cx.strokeStyle = GRE; cx.beginPath(); cx.moveTo(X + 36, y); cx.lineTo(X + 42, y); cx.stroke(); }
     barra(xl, y0, y1, w, vis.vL + g, vis.hL + g, min); barra(xr, y0, y1, w, vis.vR + g, vis.hR + g, min);
+    if (PADS) {           // (2.3) os PADS no lugar dos LED de pico; os LED (> −0.5 dBTP) ficam pequenos ao lado do L e do R
+      cx.fillStyle = vis.oL ? MAG : '#461e4a'; cx.fillRect(xl + w / 2 + 7, y0 - 13, 8, 7);
+      cx.fillStyle = vis.oR ? MAG : '#461e4a'; cx.fillRect(xr + w / 2 + 7, y0 - 13, 8, 7);
+      const x0p = xr + w + 14; padsGrade(x0p, Y + 6, X + Wd - 6 - x0p, Ht - 12, 2, 5);
+      return;
+    }
     const px = xr + w + 24;
     texto(T('pico'), px + 22, Y + 28, '#fff', 12, '600', 'center');
     texto('L', px + 7, Y + 46, ROT, 10, '', 'center'); texto('R', px + 37, Y + 46, ROT, 10, '', 'center');
@@ -601,6 +709,131 @@
     zero.connect(ctx.destination);
   }
 
+  // ---- (2.2) o MODO SERVIDOR: o audio esta' na maquina do ar; os numeros vem dos GET dela ----
+  const SRV = {on: false, o: null, ponto: 'saida', gen: 0, semEsp: false, vazio: false, falha: {esp: 0, aud: 0, est: 0},
+    pedidos: {esp: 0, aud: 0, est: 0}, t0: 0, rta: null, espA: null, aud: null, lu: null, estRef: null, estT: -1e9, wfT: 0, wfAnt: null};
+  let FASE = null, ovAntes = null;
+  const fin = v => (typeof v === 'number' && isFinite(v) && v > -98 ? v : -99);
+  const amp = v => (typeof v === 'number' && isFinite(v) ? Math.pow(10, v / 20) : 0);
+  // o true-peak 4x de um bloco (os filtros de fase do DSP; so' a partir da 12.a amostra: os blocos pedidos nao sao seguidos)
+  function tpBloco(x) {
+    if (!FASE) FASE = new ((new Function(DSP + '; return MedDSP;'))())(48000).fase;
+    let m = 0; const n = x.length;
+    for (let i = 0; i < n; i++) { const a = Math.abs(x[i]); if (a > m) m = a; }
+    for (let i = 11; i < n; i++) for (let f = 1; f < 4; f++) { const h = FASE[f]; let s = 0;
+      for (let t = 0; t < 12; t++) s += h[t] * x[i - 11 + t];
+      s = Math.abs(s); if (s > m) m = s; }
+    return m;
+  }
+  // 61 bandas de 1/6 de oitava (dB de amplitude de um seno) -> as 31 de 1/3: a do centro + metade de cada vizinha, em potencia
+  function terco(f, a) {
+    return BANDAS.map(fb => { let i = 0, m = 1e9;
+      for (let k = 0; k < f.length; k++) { const d = Math.abs(Math.log(f[k] / fb)); if (d < m) { m = d; i = k; } }
+      let p = Math.pow(10, a[i] / 10);
+      if (i > 0) p += 0.5 * Math.pow(10, a[i - 1] / 10);
+      if (i < a.length - 1) p += 0.5 * Math.pow(10, a[i + 1] / 10);
+      return p > 1e-14 ? 10 * Math.log10(p) : -140; });
+  }
+  function interpF(f, a, fq) {           // o valor das bandas a' frequencia fq (linear em log f)
+    const n = f.length, u = fq > 0 ? Math.log(fq / f[0]) / Math.log(f[n - 1] / f[0]) * (n - 1) : -1;
+    if (u <= 0) return a[0]; if (u >= n - 1) return a[n - 1];
+    const i = Math.floor(u), t = u - i; return a[i] * (1 - t) + a[i + 1] * t;
+  }
+  function espSrv(d) {
+    const f = d.f, fonte = {S: d.m || d.l, L: d.l, R: d.r || d.l}, t = agora();
+    SRV.rta = {S: terco(f, fonte.S), L: terco(f, fonte.L), R: terco(f, fonte.R)};
+    if (ops.espectro) {                  // o ESPECTRO: a curva das 61 bandas posta nas riscas de uma FFT de 4096 (o desenho e o AUTO PICO sao os do stream)
+      const df = 48000 / NFFT, mk = a => { const e = new Float64Array(NFFT / 2); for (let k = 0; k < e.length; k++) e[k] = interpF(f, a, k * df); return e; };
+      SRV.espA = {S: mk(fonte.S), L: mk(fonte.L), R: mk(fonte.R)};
+    } else SRV.espA = null;
+    // a cascata: 10 linhas/s (como no stream), interpoladas entre a resposta anterior e esta. Cada banda de 1/6 de oitava passa a
+    // nivel POR RISCA de uma FFT de 4096 (o da cascata do stream): menos 10*log10(riscas da banda), nunca menos de 1 risca
+    const col = {}, kr = 10 * Math.log10(Math.pow(2, 1 / 12) - Math.pow(2, -1 / 12)), df0 = 48000 / NFFT;
+    for (const k of ['L', 'R', 'S']) { const v = new Float64Array(NC);
+      for (let c = 0; c < NC; c++) { const fq = fCol(c); v[c] = interpF(f, fonte[k], fq) - Math.max(0, kr + 10 * Math.log10(fq / df0)); }
+      col[k] = v; }
+    if (!SRV.wfAnt) { SRV.wfT = t; SRV.wfAnt = col; for (const k of ['L', 'R', 'S']) linhaV(CH[k], col[k]); return; }
+    let nl = Math.floor((t - SRV.wfT) * 10);
+    if (nl <= 0) return;
+    if (nl > 8) { nl = 8; SRV.wfT = t; } else SRV.wfT += nl / 10;
+    for (let j = 1; j <= nl; j++) { const u = j / nl;
+      for (const k of ['L', 'R', 'S']) { const a = SRV.wfAnt[k], b = col[k]; for (let c = 0; c < NC; c++) LBUF[c] = a[c] * (1 - u) + b[c] * u; linhaV(CH[k], LBUF); } }
+    SRV.wfAnt = col;
+  }
+  function audSrv(d) {
+    const l = d.l, r = d.r && d.r.length === l.length ? d.r : l, n = l.length;
+    const pL = amp(d.pico_l), pR = amp(d.pico_r), tL = Math.max(pL, tpBloco(l)), tR = Math.max(pR, tpBloco(r));
+    const gL = new Float32Array(NGON), gR = new Float32Array(NGON);
+    for (let i = 0; i < NGON; i++) { const k = n - 2 * NGON + 2 * i + 1; if (k >= 0) { gL[i] = l[k]; gR[i] = r[k]; } }   // 1 em 2, como no DSP
+    const rl = fin(d.rms_l), rr = fin(d.rms_r);
+    SRV.aud = {pL, pR, tL, tR, corr: typeof d.correlacao === 'number' ? d.correlacao : 0, bal: rl > -98 && rr > -98 ? rl - rr : 0, gL, gR, fs: d.sr || 48000};
+    tpMax = Math.max(tpMax, tL, tR);
+    const tn = db(Math.max(tL, tR)), t = agora();
+    if (tn >= rec.v || t - rec.t > 1) { rec.v = tn; rec.t = t; }
+  }
+  const NADA = new Array(NB).fill(-120), GZ = new Float32Array(NGON);
+  function compoe() {
+    const a = SRV.aud, R0 = SRV.rta, u = SRV.lu || {m: -99, s: -99, i: -99}, sem = SRV.semEsp || !R0, E = !sem && SRV.espA;
+    if (!a && !R0) return;
+    L = {pL: a ? db(a.pL) : -120, pR: a ? db(a.pR) : -120, tL: a ? db(a.tL) : -120, tR: a ? db(a.tR) : -120, tpMax: db(tpMax), rec: rec.v,
+      mom: u.m, curto: u.s, integ: u.i, corr: a ? a.corr : 0, bal: a ? a.bal : 0,
+      rta: sem ? NADA : R0.S, rtaL: sem ? NADA : R0.L, rtaR: sem ? NADA : R0.R,
+      esp: E ? E.S : null, espL: E ? E.L : null, espR: E ? E.R : null, gL: a ? a.gL : GZ, gR: a ? a.gR : GZ, fs: a ? a.fs : 48000};
+    balistica(L);
+  }
+  const luDe = e => { const q = e && e.loudness && e.loudness[SRV.ponto === 'entrada' ? 'entrada' : 'saida']; return q ? {m: fin(q.m), s: fin(q.s), i: fin(q.i)} : null; };
+  async function pedeJson(k, cam) {
+    const op = {cache: 'no-store'};
+    try { if (window.AbortSignal && AbortSignal.timeout) op.signal = AbortSignal.timeout(4000); } catch (e) { /* */ }
+    SRV.pedidos[k]++;
+    const r = await fetch((SRV.o.base || '') + cam, op);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+  const pEsp = async () => {
+    const o = SRV.o;
+    if (o.permite && !o.permite()) { if (!SRV.semEsp) { SRV.semEsp = true; compoe(); } return 'salta'; }   // o ⚡ RECURSOS desligou os desenhos
+    SRV.semEsp = false;
+    const d = await pedeJson('esp', '/api/espectro-audio?ponto=' + SRV.ponto);
+    if (!d || !d.f || !d.l || !d.f.length) return d ? 'ok' : 'erro';
+    espSrv(d); compoe(); return 'ok';
+  };
+  const pAud = async () => {
+    const d = await pedeJson('aud', '/api/audio?ponto=' + SRV.ponto + '&n=' + 2 * NGON);
+    if (!d || !d.l || !d.l.length) { SRV.vazio = !!d; return d ? 'ok' : 'erro'; }
+    SRV.vazio = false; audSrv(d); compoe(); return 'ok';
+  };
+  const pEst = async () => {                // o loudness: o /api/estado que a pagina ja' pede; so' se ele parar (3 s) se pede aqui
+    const o = SRV.o, e = o.estado ? o.estado() : null, t = performance.now();
+    if (e && e !== SRV.estRef) { SRV.estRef = e; SRV.estT = t; SRV.lu = luDe(e) || SRV.lu; return 'salta'; }
+    if (o.estado && t - SRV.estT < 3000) return 'salta';
+    SRV.lu = luDe(await pedeJson('est', '/api/estado')) || SRV.lu; return 'ok';
+  };
+  function laco(k, per, pede) {
+    const g = SRV.gen; let espera = per;
+    const vai = async () => {
+      if (g !== SRV.gen) return;
+      if (document.hidden) { setTimeout(vai, 600); return; }       // a pagina atras: nenhum pedido
+      const t0 = performance.now(); let r;
+      try { r = await pede(); } catch (e) { r = 'erro'; }
+      if (g !== SRV.gen) return;
+      if (r === 'erro') { SRV.falha[k]++; espera = Math.min(8000, Math.max(1000, espera * 2)); } else { SRV.falha[k] = 0; espera = r === 'salta' ? Math.max(per, 500) : per; }
+      erro = SRV.falha.aud >= 2 && (SRV.falha.esp >= 2 || SRV.semEsp) ? 'e_srv' : SRV.vazio && !SRV.aud ? 'e_vazio' : '';
+      setTimeout(vai, Math.max(20, espera - (performance.now() - t0)));
+    };
+    vai();
+  }
+  function srvLiga(o) {
+    SRV.gen++; SRV.on = true; SRV.o = o || {}; SRV.ponto = SRV.o.ponto === 'entrada' ? 'entrada' : 'saida';
+    L = null; erro = ''; repor(true);
+    Object.assign(SRV, {semEsp: false, vazio: false, rta: null, espA: null, aud: null, lu: null, estRef: null, estT: -1e9, wfT: 0, wfAnt: null,
+      falha: {esp: 0, aud: 0, est: 0}, pedidos: {esp: 0, aud: 0, est: 0}, t0: performance.now()});
+    if (ovAntes === null) {                 // a pagina de tras nao rola (nem mostra a barra)
+      const d = document.documentElement, b = document.body; ovAntes = [d.style.overflow, b.style.overflow]; d.style.overflow = b.style.overflow = 'hidden'; }
+    const g = SRV.gen;
+    laco('esp', 200, pEsp); setTimeout(() => g === SRV.gen && laco('aud', 200, pAud), 100); laco('est', 500, pEst);
+  }
+
   // ---- a janela (tela grande) ----
   let cx0 = null, pinta = null;
   function monta() {
@@ -611,7 +844,7 @@
 #sammed .bt{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:6px 8px 8px;background:linear-gradient(180deg,#232428,#141517)}
 #sammed button{flex:0 0 auto;min-width:64px;min-height:38px;padding:0 12px;border-radius:19px;border:1.5px solid #4e5056;background:linear-gradient(180deg,#2c2d31,#0c0c0e);color:#bec2c8;font:600 12.5px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.04em;cursor:pointer;white-space:nowrap}
 #sammed button[aria-pressed=true]{color:${AMAR};border-color:#8a7f1a}
-#sammed button .on{color:${AMAR}}
+#sammed button .on{color:${AMAR};background:none;border:0;padding:0;margin:0;box-shadow:none;border-radius:0}
 #sammed button.x{color:#fff;border-color:${AZUL}}
 #sammed button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media (max-height:480px){#sammed .bt{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:4px 8px 5px}#sammed button{min-height:34px;min-width:0}}`;
@@ -628,6 +861,7 @@
     B(() => T('b_casc'), () => (ops.cascata = !ops.cascata), () => ops.cascata);
     B(() => 'RESET', () => repor());
     B(() => T('b_pico'), () => (ops.pico = !ops.pico), () => ops.pico);
+    B(() => T('b_estilo') + ' · <span class="on">' + T('st_' + estilo()) + '</span>', proxEstilo, null, 'estilo');   // (2.3)
     B(() => T('b_escala'), () => (ops.e80 = !ops.e80), () => ops.e80);
     B(() => T('b_tela'), () => { const d = document; if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d); else cheia(); }, () => !!(document.fullscreenElement || document.webkitFullscreenElement));
     B(() => par('EN', 'PT', ops.lingua !== 'PT'), () => { ops.lingua = ops.lingua === 'PT' ? 'EN' : 'PT'; guarda(); });
@@ -657,16 +891,23 @@
 
   window.SAMMED = {
     async abrir(o) {
-      monta(); nomeCanal = (o && o.nome) || ''; aberto = true; cx0.hidden = false;
+      monta(); nomeCanal = (o && o.nome) || ''; produto = (o && o.produto) || ''; aberto = true; cx0.hidden = false;
+      if (o && !linguaFixa && (o.lingua === 'PT' || o.lingua === 'EN')) ops.lingua = o.lingua;
+      if (o && typeof o.gate === 'number' && !gateMexido) ops.gate = Math.max(-120, Math.min(-20, o.gate));   // (2.2) a PRO: saida processada alta, -60
+      const pd = o && !o.servidor && o.pads;       // (2.3) os PADS: so' no modo do stream e so' se a pagina os der
+      PADS = pd && typeof pd.lista === 'function' && typeof pd.tocar === 'function' ? pd : null;
       if (!(o && o.semTelaCheia)) cheia();
       cancelAnimationFrame(raf); ciclo();
+      if (o && o.servidor) { srvLiga(o.servidor); return; }     // (2.2) a AIR MAX PRO: os GET da maquina do ar, sem audio aqui
+      SRV.gen++; SRV.on = false;
       if (o && o.prova) { window.SAMMED._prova = recebe; return; }
       if (!ctx) await montaAudio(); else try { await ctx.resume(); } catch (e) { /* */ }
       await liga(o && o.url);
     },
-    canal(u, nome) { nomeCanal = nome || ''; if (aberto && u !== url) liga(u); },
+    canal(u, nome) { nomeCanal = nome || ''; if (aberto && !SRV.on && u !== url) liga(u); },
     fechar() {
-      aberto = false; clearTimeout(cai); cancelAnimationFrame(raf);
+      aberto = false; clearTimeout(cai); cancelAnimationFrame(raf); SRV.gen++;    // (2.2) os pedidos ao servidor param aqui
+      if (ovAntes !== null) { document.documentElement.style.overflow = ovAntes[0]; document.body.style.overflow = ovAntes[1]; ovAntes = null; }
       if (cx0) cx0.hidden = true;
       if (au) { au.removeAttribute('src'); try { au.load(); } catch (e) { /* */ } }
       if (ctx) ctx.suspend().catch(() => {});
@@ -681,5 +922,12 @@
     _cascata: c => { const C = CH[c] || CH.S, g = ops.ganhos.cascata, b = C.wi * NC, v = [], f = [];
       for (let i = 0; i < NC; i++) { v.push(C.wf[b + i] + g); f.push(fCol(i)); } return {v, f, gate: ops.gate}; },
     _desenha: () => desenha(),
+    // (2.3) as provas: o estilo em uso, os pads e os VU do ultimo desenho (pads em coordenadas do ecra, para tocar)
+    _estilo: () => estilo(),
+    _pads: () => { const r = cv ? cv.getBoundingClientRect() : {left: 0, top: 0};
+      return padsZ.map(p => ({i: p.i, tem: p.tem, x: r.left + (p.x + p.w / 2) * esc, y: r.top + (p.y + p.h / 2) * esc, w: p.w * esc, h: p.h * esc})); },
+    _vus: () => vusZ.slice(), _temPads: () => !!PADS,
+    _padsEditar: () => { const r = cv.getBoundingClientRect(); return editZ ? {x: r.left + (editZ.x + editZ.w / 2) * esc, y: r.top + (editZ.y + editZ.h / 2) * esc} : null; },
+    _srv: () => ({on: SRV.on, pedidos: Object.assign({}, SRV.pedidos), s: (performance.now() - SRV.t0) / 1000, semEsp: SRV.semEsp, erro}),
   };
 })();
