@@ -1,4 +1,4 @@
-// SAM WEB RADIO FREE - os MEDIDORES 2.3 (03/11). Serve a pagina web, a app Android e (2.2) a pagina da AIR MAX PRO (o mesmo ficheiro).
+// SAM WEB RADIO FREE - os MEDIDORES 2.4 (03/11). Serve a pagina web, a app Android e (2.2) a pagina da AIR MAX PRO (o mesmo ficheiro).
 // 2.0: RTA de 1/3 de oitava ou ESPECTRO (FFT 4096), loudness BS.1770 (momentaneo 400 ms, curto 3 s, programa com as portas
 // -70 / -10), true-peak 4x (dBTP), barras L/R, Mid/Side, correlacao e balanco.
 // 2.1: dois ecras - L|R (RTA, VU e CASCATA de cada canal, os numeros ao centro) e L+R (a soma, como na 2.0, mais VU e cascata);
@@ -18,6 +18,9 @@
 // SAMMED.abrir({..., pads: {lista: () => [{nome, url} x10], tocar: i => {...}, editar: () => {...}, ativo: () => i}}).
 // Daqui so' se mostram os NOMES (nunca o endereco) e nada se guarda dos pads; editar e' da pagina (com a senha do SISTEMA).
 // No modo servidor nao ha' pads.
+// 2.4 (03/11): os PADS tambem no L|R (deitado: a coluna do meio mais larga, os numeros a' esquerda e os PADS a' direita;
+// telemovel deitado: goniometro + balanco + numeros a' esquerda e os PADS a' direita, sem ESCALAS; em pe': por baixo da cascata).
+// Sem pads (modo servidor / PRO) o L|R fica como estava.
 (function () {
   'use strict';
   const BANDAS = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
@@ -358,7 +361,19 @@
     if (!L) { texto(T(erro || (SRV.on ? 'liga_s' : 'liga')), VW / 2, VH / 2, erro ? AMBAR : ROT, 18, '600', 'center'); return; }
     const P = 8, G = 8, top = 28, bot = VH - P, alt = bot - top;
     if (deitado) {
-      if (LR && baixo) {
+      if (LR && baixo && PADS) {             // (2.4) telemovel deitado com PADS: [gonio/balanco/numeros | PADS] no meio, sem ESCALAS
+        const cw = lim(VW * 0.5, 480, 560), sw = (VW - 2 * P - cw - 2 * G) / 2, xc = P + sw + G, xr = xc + cw + G, ca = (cw - G) / 2;
+        coluna(CH.L, P, top, sw, alt, 'L'); coluna(CH.R, xr, top, sw, alt, 'R');
+        const hg = lim(alt * 0.32, 110, 150), hb = 48, hn = alt - hg - hb - 2 * G;
+        gonio(xc, top, ca, hg); balanco(xc, top + hg + G, ca, hb); numeros(xc, top + hg + hb + 2 * G, ca, hn, 1, true);
+        padsPainel(xc + ca + G, top, ca, alt);
+      } else if (LR && PADS) {               // (2.4) com PADS: o meio mais largo; numeros (compactos) a' esquerda e PADS a' direita
+        const cw = lim(VW * 0.4, 440, 520), sw = (VW - 2 * P - cw - 2 * G) / 2, xc = P + sw + G, xr = xc + cw + G, ca = (cw - G) / 2;
+        coluna(CH.L, P, top, sw, alt, 'L'); coluna(CH.R, xr, top, sw, alt, 'R');
+        const hg = lim(alt * 0.22, 110, 170), hb = 48, hs = 84, hm = alt - hg - hb - hs - 3 * G, ym = top + hg + G;
+        gonio(xc, top, cw, hg); numeros(xc, ym, ca, hm, 1, true); padsPainel(xc + ca + G, ym, ca, hm);
+        balanco(xc, ym + hm + G, cw, hb); escalas(xc, bot - hs, cw, hs);
+      } else if (LR && baixo) {
         const cw = lim(VW * 0.4, 460, 540), sw = (VW - 2 * P - cw - 2 * G) / 2, xc = P + sw + G, xr = xc + cw + G, ca = (cw - G) / 2;
         coluna(CH.L, P, top, sw, alt, 'L'); coluna(CH.R, xr, top, sw, alt, 'R');
         const hb = 48, hs = 84, hg = alt - hb - hs - 2 * G;
@@ -378,7 +393,7 @@
         gonio(xr, top, rw, hg); barrasLR(xr, top + hg + G, rw, hv); balanco(xr, top + hg + G + hv + G, rw, hb); if (!semEsc) escalas(xr, bot - hs, rw, hs);
       }
     } else {
-      const hp = !LR && PADS ? 104 : 0;      // (2.3) os PADS em pe' (5 x 2): os numeros, os VU e a linha de baixo mais baixos
+      const hp = PADS ? 104 : 0;      // (2.3) os PADS em pe' (5 x 2; 2.4: tambem no L|R): os numeros, os VU e a linha de baixo mais baixos
       const lw = VW - 2 * P, w2 = (lw - G) / 2, hn = hp ? 4 * 34 + 3 * 4 : 4 * 40 + 3 * 4;
       numeros(P, top, lw, hn, 2);
       let y = top + hn + G;
@@ -392,6 +407,12 @@
       if (hp) { painel(P, y, lw, hp); padsGrade(P + 8, y + 6, lw - 16, hp - 12, 5, 2); y += hp + G; }
       gonio(P, y, w2, hBot); balanco(P + w2 + G, y, w2, 48); escalas(P + w2 + G, y + 48 + 6, w2, hBot - 54);
     }
+  }
+  // (2.4) o painel dos PADS: 2 x 5 (1 x 10 se for estreito)
+  function padsPainel(X, Y, Wd, Ht) {
+    painel(X, Y, Wd, Ht);
+    const w = Wd - 16, duas = w >= 150;
+    padsGrade(X + 8, Y + 6, w, Ht - 12, duas ? 2 : 1, duas ? 5 : 10, Math.ceil(lim(31 / esc, 18, 34)));   // o ✎ EDIT com >= 30 px no ecra
   }
   // o nome de um pad em 1 ou 2 linhas (corta nas palavras; o resto com …)
   function linhasNome(s, mx, tz, duas) {
@@ -409,9 +430,9 @@
   }
   // (2.3) os 10 PADS: o titulo + ✎ EDITAR na linha de cima e a grelha por baixo (2 colunas: 1-5 a' esquerda, 6-10 a' direita;
   // 5 colunas: 1-5 em cima). Tocar num pad com nome chama pads.tocar(i); o que toca tem o contorno azul e o ▶.
-  function padsGrade(X, Y, Wd, Ht, cols, rows) {
-    const lista = padsLista(), at = padsAtivo(), eh = 18, ew = Math.min(Wd * 0.55, larg(T('EDIT'), 11, '700') + 16);
-    texto(T('PADS'), X, Y + 13, ROT, 10.5, '700');
+  function padsGrade(X, Y, Wd, Ht, cols, rows, ehq) {
+    const lista = padsLista(), at = padsAtivo(), eh = ehq || 18, ew = Math.min(Wd * 0.55, larg(T('EDIT'), 11, '700') + (ehq ? 24 : 16));
+    texto(T('PADS'), X, Y + eh / 2 + 4, ROT, 10.5, '700');
     botao(X + Wd - ew, Y, ew, eh, T('EDIT'), () => { try { if (PADS && PADS.editar) PADS.editar(); } catch (e) { /* */ } }); editZ = {x: X + Wd - ew, y: Y, w: ew, h: eh};
     const g = 6, y0 = Y + eh + 6, pw = (Wd - (cols - 1) * g) / cols, ph = (Ht - (y0 - Y) - (rows - 1) * g) / rows;
     if (pw < 20 || ph < 12) return;
@@ -564,10 +585,14 @@
     cx.fillStyle = gr; cx.fillRect(x1 + 4, y0, 7, y1 - y0); cx.strokeStyle = '#3a3c40'; cx.strokeRect(x1 + 4.5, y0 + 0.5, 6, y1 - y0 - 1);
     if (SRV.on && SRV.semEsp) { cx.fillStyle = 'rgba(8,9,11,.78)'; cx.fillRect(x0, y0, x1 - x0, y1 - y0); texto(T('eco_c'), (x0 + x1) / 2, (y0 + y1) / 2, AMBAR, 13, '700', 'center'); }
   }
-  function cela(x, y, w, h, tit, v, un, ok, cor, dec) {
+  function cela(x, y, w, h, tit, v, un, ok, cor, dec, dir) {
     painel(x, y, w, h);
     const s = ok ? (dec === 2 ? fmtS(v, 2) : un === 'dBTP' || un === 'dBFS' ? fmtS(v) : fmt(v)) : '—', c = ok ? cor : '#6b6e74';
-    if (h >= 36) {
+    if (h >= 36 && dir) {               // (2.4) compacto: o titulo em cima e o valor encostado a' direita
+      texto(corta(tit, w - 16, 10.5), x + 8, y + 13, ROT, 10.5);
+      const fz = lim(h - 18, 12, 24), yb = Math.min(y + h - 6, y + 18 + (h - 18) / 2 + fz * 0.36), wu = larg(un, 11, '700');
+      texto(un, x + w - 8, yb, '#fff', 11, '700', 'right'); texto(s, x + w - 14 - wu, yb, c, fz, '700', 'right');
+    } else if (h >= 36) {
       texto(tit, x + 8, y + 13, ROT, 10.5);
       const fz = Math.min(30, h - 18), yb = Math.min(y + h - 7, y + 18 + (h - 18) / 2 + fz * 0.36);
       texto(s, x + 8, yb, c, fz, '700'); texto(un, x + 14 + larg(s, fz, '700'), yb, '#fff', 11, '700');
@@ -578,14 +603,14 @@
       texto(corta(tit, w - 30 - wu - larg(s, fz, '700'), 10.5), x + 8, y + h / 2 + 4, ROT, 10.5);
     }
   }
-  function numeros(X, Y, Wd, Ht, cols) {
+  function numeros(X, Y, Wd, Ht, cols, dir) {
     const okI = L.integ > -98, okT = L.tpMax > -119;
     const it = [[T('PROG'), L.integ, 'LUFS', okI, AMBAR], [T('LKFS'), L.integ, 'LKFS', okI, AMBAR],
       [T('TP'), L.tpMax, 'dBTP', okT, L.tpMax > -1 ? MAG : AMAR], [T('REC'), L.rec, 'dBFS', L.rec > -119, L.rec > -1 ? MAG : AMAR],
       [T('PLR'), L.tpMax - L.integ, 'LU', okI && okT, '#d8dade'], [T('CURTO'), L.curto, 'LUFS', L.curto > -98, AZUL], [T('MOM'), L.mom, 'LUFS', L.mom > -98, AZUL]];
     if (cols === 2) it.push([T('CORR'), vis.corr, '', true, vis.corr < 0 ? AMBAR : AZUL, 2]);
     const g = cols === 2 ? 4 : 3, nl = Math.ceil(it.length / cols), h = (Ht - (nl - 1) * g) / nl, w = (Wd - (cols - 1) * 4) / cols;
-    it.forEach((q, i) => cela(X + (i % cols) * (w + 4), Y + Math.floor(i / cols) * (h + g), w, h, q[0], q[1], q[2], q[3], q[4], q[5]));
+    it.forEach((q, i) => cela(X + (i % cols) * (w + 4), Y + Math.floor(i / cols) * (h + g), w, h, q[0], q[1], q[2], q[3], q[4], q[5], dir));
   }
   function segmentos(x0, x1, y, h, v, a, b, corNeg) {
     const n = 21, meio = 10, lw = (x1 - x0) / n, iv = Math.round(lim((v - a) / (b - a), 0, 1) * (n - 1));

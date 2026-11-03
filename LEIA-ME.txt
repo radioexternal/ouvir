@@ -1,4 +1,4 @@
-SAM WEB RADIO FREE - versão 2.3 (código 13)
+SAM WEB RADIO FREE - versão 2.4 (código 14)
 ==========================================
 
 O que é
@@ -21,7 +21,7 @@ Canais
 3. VIBE GRAMADO          https://s48.myradiostream.com:14670/   (AAC 128 kbps)
 4. STUDIO 2              http://uk15freenew.listen2myradio.com:20082/stream   (MP3)
 
-MEDIDORES (2.0; renovados na 2.1 e na 2.3)
+MEDIDORES (2.0; renovados na 2.1, na 2.3 e na 2.4)
 -----------------------------------------
 O botão 📊 MEDIDORES abre o ecrã dos medidores em tela grande. Os
 textos dos medidores vêm em inglês; o botão EN / PT passa-os para
@@ -53,6 +53,7 @@ RTA, os VU e a cascata.
 Botões: L|R / L+R · RTA · ESPECTRO · CASCATA · RESET · PICO ·
 ESTILO · ESCALA −80 · TELA · EN / PT · FECHAR.
 
+Novo na 2.4: os 10 PADS também no L|R (deitado: no meio, ao lado dos números; em pé: por baixo da cascata); sem pads o L|R fica igual.
 Novo na 2.3:
 - ESTILO do RTA (nos dois ecrãs, também em pé): AZUL (barras azuis com
   o pico em contorno amarelo) → BARRAS (barras amarelas, a banda
@@ -88,6 +89,7 @@ right. Each RTA shows "Frequency / Level" of the loudest band (AUTO);
 tap a band to pick it (MANUAL), 5 s or a double tap returns to AUTO.
 GAIN ±10 dB per RTA, VU and WATERFALL, and the waterfall GATE (default
 −80 dB); gain only moves the drawing, the numbers stay true.
+New in 2.4: the 10 PADS also in L|R (landscape: centre column, beside the readings; portrait: under the waterfall).
 New in 2.3: RTA STYLE button (BLUE → BARS → LINE → FILL) for every RTA
 and the spectrum, PEAK still toggles the peak marks; L|R starts in BLUE,
 L+R in BARS until you choose (remembered). L+R now shows VU L, VU R and
@@ -107,7 +109,7 @@ voltar ao normal). O STUDIO 2 não deixa medir (o servidor não autoriza).
 
 Como instalar o app (Android)
 -----------------------------
-1. Baixe o arquivo SAM-WEB-RADIO-FREE-2.3.apk no celular (pelo botão
+1. Baixe o arquivo SAM-WEB-RADIO-FREE-2.4.apk no celular (pelo botão
    «Baixar o app Android» do site, ou recebido por mensagem, e-mail ou
    cabo USB).
 2. Toque no arquivo. Na primeira vez o Android avisa que o app vem de
@@ -115,7 +117,7 @@ Como instalar o app (Android)
    desta fonte» para o aplicativo que abriu o arquivo (o navegador, o
    gerenciador de arquivos ou o de mensagens). Volte e toque em
    «Instalar».
-   Quem já tem uma versão anterior (1.0 a 2.2) instala a 2.3 por cima
+   Quem já tem uma versão anterior (1.0 a 2.3) instala a 2.4 por cima
    (atualiza sem apagar).
 3. Abra o «SAM WEB RADIO FREE», escolha o canal e toque em PLAY. No
    Android 13 ou mais novo, permita as notificações para ter o botão de
@@ -133,6 +135,7 @@ O STUDIO 2 (sem endereço seguro) tem o botão «▶ Abrir no leitor do
 celular», que o abre no leitor do próprio celular; no app Android tocam
 todos.
 
+Versão 2.4 feita por: IA-LAB4 @ LAB-REMOTO-4 (03/11/2026) - 2.4: os 10 PADS também no L|R (pads in stereo too)
 Versão 2.3 feita por: IA-LAB4 @ LAB-REMOTO-4 (03/11/2026) - 2.3: ESTILO do RTA, VU L/R no L+R, 10 PADS, ⚙ SISTEMA com senha
 Versão 2.1 feita por: IA-LAB4 @ LAB-REMOTO-4 (02/11/2026) - 2.1: MEDIDORES L|R e L+R, CASCATA, AUTO PICO, GANHO/GATE, EN/PT
 Versão 2.0 feita por: IA-LAB4 @ LAB-REMOTO-4 (02/11/2026) - 2.0: MEDIDORES
