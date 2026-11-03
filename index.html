@@ -62,6 +62,8 @@ main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20
 input[type=range]{flex:1;min-width:0;accent-color:var(--a);height:28px}
 .eq{display:inline-flex;gap:2px;align-items:flex-end;height:12px;margin-left:8px;vertical-align:middle}.eq i{width:3px;background:var(--a);animation:eq .8s ease-in-out infinite}
 .eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}@keyframes eq{0%,100%{height:3px}50%{height:12px}}
+.med{display:block;margin:16px auto 0;min-height:44px;padding:10px 18px;border-radius:22px;border:1px solid var(--b);background:linear-gradient(180deg,#14212d,#0a121a);color:#4fc3f7;font:800 13px system-ui,-apple-system,sans-serif;letter-spacing:.08em;cursor:pointer}
+.med:focus-visible{outline:3px solid #fff;outline-offset:3px}
 footer{text-align:center;color:var(--m);font:600 11px/1.5 system-ui,-apple-system,sans-serif;padding:0 16px calc(18px + env(safe-area-inset-bottom))}
 footer a{color:var(--a2)}
 @media (prefers-reduced-motion:reduce){.eq i{animation:none;height:8px}}
@@ -81,10 +83,12 @@ footer a{color:var(--a2)}
       <a class="abrir" id="abrir" href="baixar.html" target="_blank" rel="noopener noreferrer">▶ Abrir no leitor do celular</a></div>
     <div class="agora" id="agora" hidden><small>TOCANDO AGORA</small><b id="titulo"></b></div>
     <div class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume"><span id="volv">100</span></div>
+    <button class="med" id="med">📊 MEDIDORES</button>
   </div>
 </main>
-<footer>SAM WEB RADIO FREE · versão 1.9 · <a href="baixar.html">baixar o app Android</a></footer>
+<footer>SAM WEB RADIO FREE · versão 2.0 · <a href="baixar.html">baixar o app Android</a></footer>
 <audio id="au" preload="none"></audio>
+<script src="medidores.js"></script>
 <script>
 // ---- a LISTA DOS CANAIS: acrescentar um canal = acrescentar UMA linha ----
 // http:  o endereco normal (vale na pagina aberta do computador ou num site sem cadeado)
@@ -195,6 +199,7 @@ function escolhe(i) {
   if (quer && !stream()) pausa();
   pintaCanais();
   if (quer) { tentativas = 0; aEsperar = false; fechaAudio(); abre(); meta(); }
+  if (window.SAMMED) SAMMED.canal(stream(), CANAIS[canal].nome);
 }
 pintaCanais();
 au.addEventListener('playing', () => { tentativas = 0; tocou = true; mostra('tocando'); });
@@ -245,6 +250,8 @@ let pedido = null;                                                             /
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedido = e; if (!le('faixa-inst')) $('faixa-inst').hidden = false; });
 $('instalar').onclick = () => { $('faixa-inst').hidden = true; if (pedido) { pedido.prompt(); pedido = null; } };
 $('faixa-inst-x').onclick = () => { $('faixa-inst').hidden = true; guarda('faixa-inst', '1'); };
+// (2.0) os MEDIDORES: RTA, espectro, LUFS, true-peak e dBTP do canal, em tela grande (medidos numa copia; o leitor nao muda)
+$('med').onclick = () => SAMMED.abrir({url: stream(), nome: CANAIS[canal].nome});
 if ('serviceWorker' in navigator && SEGURA) navigator.serviceWorker.register('sw.js').catch(() => { /* */ });
 </script>
 </body>
