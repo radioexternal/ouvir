@@ -1,4 +1,4 @@
-SAM WEB RADIO FREE - versão 2.0 (código 11)
+SAM WEB RADIO FREE - versão 2.1 (código 12)
 ==========================================
 
 O que é
@@ -20,14 +20,53 @@ Canais
 3. VIBE GRAMADO          https://s48.myradiostream.com:14670/   (AAC 128 kbps)
 4. STUDIO 2              http://uk15freenew.listen2myradio.com:20082/stream   (MP3)
 
-MEDIDORES (novo na 2.0)
------------------------
-O botão 📊 MEDIDORES abre o ecrã dos medidores em tela grande (deitado):
-RTA de 1/3 de oitava ou ESPECTRO, LOUDNESS de programa (LUFS, com as
-portas da norma), curto prazo e momentâneo, TRUE-PEAK máximo (dBTP), a
-relação pico/loudness, as barras L e R em dBTP com as luzes de PICO
-(magenta = passou de -0,5 dBTP), Mid/Side, correlação e balanço.
-Botões: RTA · ESPECTRO · RESET · PICO · ESCALA −80 · TELA · FECHAR.
+MEDIDORES (2.0; renovados na 2.1)
+---------------------------------
+O botão 📊 MEDIDORES abre o ecrã dos medidores em tela grande. Os
+textos dos medidores vêm em inglês; o botão EN / PT passa-os para
+português (fica guardado).
+Dois ecrãs, no botão L|R / L+R:
+- L|R (estéreo): à esquerda o canal L e à direita o R, cada um com o
+  seu RTA de 1/3 de oitava (ou ESPECTRO), a barra VU em dBTP (azul,
+  amarelo, âmbar e magenta, com o pico e o número) e a CASCATA
+  (o espectro a descer no tempo, 15 s, 20 Hz a 20 kHz). Ao centro:
+  goniómetro Mid/Side com a barra de CORRELAÇÃO (−1 a +1), LOUDNESS DE
+  PROGRAMA (LUFS), LKFS, TRUE-PEAK MÁX. (dBTP), PICO RECONSTRUÍDO
+  (dBFS, o true-peak do momento com 1 s de espera), PLR (LU), CURTO
+  PRAZO 3 s, MOMENTÂNEO 400 ms, BALANÇO e ESCALAS.
+- L+R (soma): o RTA da soma como na 2.0 (barras amarelas, a banda
+  escolhida em laranja, os picos em branco), o VU e a CASCATA da soma;
+  os números ao centro; à direita o goniómetro, as barras L/R em dBTP
+  com as luzes de PICO (magenta = passou de −0,5 dBTP), o balanço e as
+  escalas.
+Em cima de cada RTA: «Frequência / Nível» da banda mais forte (AUTO).
+Tocar (ou passar o rato) numa banda escolhe-a (MANUAL); ao fim de 5 s,
+ou com um toque duplo, volta ao AUTO.
+GANHO ▲ +10 / ▼ −10 dB (de −30 a +30), separado para o RTA (também no
+ESPECTRO), o VU e a CASCATA, em cada painel e nas ESCALAS; o GATE da
+cascata (◀ ▶, de −120 a −20 dB, por omissão −80): abaixo dele fica
+preto, a cor vai até 60 dB acima. O ganho só muda o desenho; os
+números mostram sempre o nível real.
+Com o telemóvel em pé, os números vêm primeiro (2 colunas), depois os
+RTA, os VU e a cascata.
+Botões: L|R / L+R · RTA · ESPECTRO · CASCATA · RESET · PICO ·
+ESCALA −80 · TELA · EN / PT · FECHAR.
+
+METERS (English)
+----------------
+The 📊 MEDIDORES button opens the meters full screen; meter texts are in
+English by default (EN / PT switches them). L|R (stereo): RTA 1/3
+octave or SPECTRUM, dBTP VU and WATERFALL for each channel, with
+Mid/Side goniometer, CORRELATION, PROGRAM LOUDNESS (LUFS), LKFS,
+TRUE-PEAK MAX, RECONSTRUCTED PEAK, PLR, SHORT-TERM 3 s, MOMENTARY
+400 ms, BALANCE and SCALES in the centre. L+R (sum): the classic RTA
+of the sum with its VU and waterfall, the readings in the centre, and
+goniometer, L/R dBTP bars with PEAK lights, balance and scales on the
+right. Each RTA shows "Frequency / Level" of the loudest band (AUTO);
+tap a band to pick it (MANUAL), 5 s or a double tap returns to AUTO.
+GAIN ±10 dB per RTA, VU and WATERFALL, and the waterfall GATE (default
+−80 dB); gain only moves the drawing, the numbers stay true.
+
 Mede o nível REAL do canal (o volume não entra): o app abre uma cópia
 do canal, sem som, só para medir; o que se ouve continua igual. A cópia
 pode ir 1 a 2 segundos à frente ou atrás do que se ouve. Com os
@@ -36,7 +75,7 @@ voltar ao normal). O STUDIO 2 não deixa medir (o servidor não autoriza).
 
 Como instalar o app (Android)
 -----------------------------
-1. Baixe o arquivo SAM-WEB-RADIO-FREE-2.0.apk no celular (pelo botão
+1. Baixe o arquivo SAM-WEB-RADIO-FREE-2.1.apk no celular (pelo botão
    «Baixar o app Android» do site, ou recebido por mensagem, e-mail ou
    cabo USB).
 2. Toque no arquivo. Na primeira vez o Android avisa que o app vem de
@@ -44,7 +83,7 @@ Como instalar o app (Android)
    desta fonte» para o aplicativo que abriu o arquivo (o navegador, o
    gerenciador de arquivos ou o de mensagens). Volte e toque em
    «Instalar».
-   Quem já tem uma versão anterior (1.0 a 1.9) instala a 2.0 por cima
+   Quem já tem uma versão anterior (1.0 a 2.0) instala a 2.1 por cima
    (atualiza sem apagar).
 3. Abra o «SAM WEB RADIO FREE», escolha o canal e toque em PLAY. No
    Android 13 ou mais novo, permita as notificações para ter o botão de
@@ -62,5 +101,6 @@ O STUDIO 2 (sem endereço seguro) tem o botão «▶ Abrir no leitor do
 celular», que o abre no leitor do próprio celular; no app Android tocam
 todos.
 
+Versão 2.1 feita por: IA-LAB4 @ LAB-REMOTO-4 (02/11/2026) - 2.1: MEDIDORES L|R e L+R, CASCATA, AUTO PICO, GANHO/GATE, EN/PT
 Versão 2.0 feita por: IA-LAB4 @ LAB-REMOTO-4 (02/11/2026) - 2.0: MEDIDORES
 Versão 1.9 feita por: IA-LAB4 @ LAB-REMOTO-4 (26/10/2026)
